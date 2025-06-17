@@ -24,8 +24,16 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Git user and push to Emmo00 personal repo
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git remote add personal https://emmo00:${{ secrets.PERSONAL_TOKEN }}@github.com/emmo00/borderless-admin-frontend.git
+
+          git remote add personal https://emmo00:${PERSONAL_TOKEN}@github.com/emmo00/borderless-admin-frontend.git
+
+          # check the remotes
+          git remote -v
+
+          # push to personal repo
           git push --force personal main:main
