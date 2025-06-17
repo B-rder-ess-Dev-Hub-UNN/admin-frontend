@@ -21,18 +21,11 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Set up Git user
+      - name: Set up Git user and push to Emmo00 personal repo
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Push to Emmo00 personal repo
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
-          repository: Emmo00/borderless-admin-frontend
-          branch: main
-          directory: .
-          force: true
+          git config --global user.name "github-actions-[bot]"
+          git config --global user.email "github-actions-[bot]@users.noreply.github.com"
+          git remote add personal https://emmo00:${{ secrets.PERSONAL_TOKEN }}@github.com/emmo00/borderless-admin-frontend.git
+          git push --force personal main:main
