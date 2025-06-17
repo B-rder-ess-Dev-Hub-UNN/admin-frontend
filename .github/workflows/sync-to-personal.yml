@@ -23,17 +23,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Git user and push to Emmo00 personal repo
+      - name: Pushes to Personal (EMMO00) repository
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@main
         env:
-          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-          git remote add personal https://emmo00:${PERSONAL_TOKEN}@github.com/emmo00/borderless-admin-frontend.git
-
-          # check the remotes
-          git remote -v
-
-          # push to personal repo
-          git push --force personal main:main
+          API_TOKEN_GITHUB: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          source-directory: .
+          destination-github-username: 'emmo00'
+          destination-repository-name: 'borderless-admin-frontend'
+          user-email: github-actions-[bot]@users.noreply.github.com
+          user-name: 'GitHub Actions Bot'
+          commit-message: ${{ github.event.commits.message }}
+          target-branch: main
