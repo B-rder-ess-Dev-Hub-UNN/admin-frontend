@@ -1,8 +1,8 @@
-import { useLocation, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaUserPlus, FaArrowLeft, FaBars, FaTimes } from 'react-icons/fa';
-import { useState } from 'react';
-import { ChartNoAxesCombined, CalendarCheck2, CircleUser } from 'lucide-react';
+import { useLocation, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaUserPlus, FaArrowLeft, FaBars, FaTimes } from "react-icons/fa";
+import { useState } from "react";
+import { ChartNoAxesCombined, CalendarCheck2, CircleUser } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -13,12 +13,12 @@ const Sidebar = () => {
   // Animation variants for mobile
   const sidebarVariants = {
     open: { x: 0, opacity: 1 },
-    closed: { x: '100%', opacity: 0 },
+    closed: { x: "100%", opacity: 0 },
   };
 
   const overlayVariants = {
-    open: { opacity: 0.5, display: 'block' },
-    closed: { opacity: 0, transitionEnd: { display: 'none' } },
+    open: { opacity: 0.5, display: "block" },
+    closed: { opacity: 0, transitionEnd: { display: "none" } },
   };
 
   // Shared sidebar content
@@ -39,18 +39,22 @@ const Sidebar = () => {
       <div className="flex-1 py-6 overflow-y-auto">
         <Link to="/check-ins" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
-            className={`flex items-center px-6 py-3 ${isActive('/check-ins') ? 'font-bold bg-gray-100' : ''}`}
+            className={`flex items-center px-6 py-3 ${
+              isActive("/check-ins") ? "font-bold bg-gray-100" : ""
+            }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
           >
-            <img src='/chair.png' className="mr-4 w-6" alt="Check In's" />
+            <img src="/chair.png" className="mr-4 w-6" alt="Check In's" />
             <span>Check In's</span>
           </motion.div>
         </Link>
 
         <Link to="/statistics" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
-            className={`flex items-center px-6 py-3 ${isActive('/statistics') ? 'font-bold bg-gray-100' : ''}`}
+            className={`flex items-center px-6 py-3 ${
+              isActive("/statistics") ? "font-bold bg-gray-100" : ""
+            }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -61,7 +65,9 @@ const Sidebar = () => {
 
         <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
-            className={`flex items-center px-6 py-3 ${isActive('/register') ? 'font-bold bg-gray-100' : ''}`}
+            className={`flex items-center px-6 py-3 ${
+              isActive("/register") ? "font-bold bg-gray-100" : ""
+            }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -72,7 +78,9 @@ const Sidebar = () => {
 
         <Link to="/schedule" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
-            className={`flex items-center px-6 py-3 ${isActive('/schedule') ? 'font-bold bg-gray-100' : ''}`}
+            className={`flex items-center px-6 py-3 ${
+              isActive("/schedule") ? "font-bold bg-gray-100" : ""
+            }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -82,14 +90,17 @@ const Sidebar = () => {
         </Link>
 
         <div className="p-6 md:mt-32 mt-48">
-         <Link to='/'> <motion.div
-            className="flex items-center cursor-pointer"
-            whileHover={{ x: 5 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <FaArrowLeft className="mr-4" size={16} />
-            <span>Back to Site</span>
-          </motion.div></Link>
+          <Link to="/">
+            {" "}
+            <motion.div
+              className="flex items-center cursor-pointer"
+              whileHover={{ x: 5 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <FaArrowLeft className="mr-4" size={16} />
+              <span>Back to Site</span>
+            </motion.div>
+          </Link>
         </div>
       </div>
     </>
@@ -134,7 +145,7 @@ const Sidebar = () => {
             animate="open"
             exit="closed"
             variants={sidebarVariants}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="w-72 h-screen flex flex-col pt-24 fixed bg-white shadow-lg z-40 right-0 lg:hidden"
           >
             {sidebarContent}
