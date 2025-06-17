@@ -1,0 +1,32 @@
+name: Sync to Personal Repo
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  sync:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push to Emmo00 personal repo
+        env:
+          PERSONAL_TOKEN: ${{ secrets.EMMO00_REPO_PAT }}
+        run: |
+          git remote add personal https://emmo00:${PERSONAL_TOKEN}@github.com/emmo00/borderless-admin-frontend.git
+          git push --force personal main:main
