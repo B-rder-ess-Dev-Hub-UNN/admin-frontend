@@ -1,10 +1,12 @@
 // import { useState } from "react";
 import { motion } from "framer-motion";
+import { useCheckInAuth } from "../context/checkInContext";
 import { useNavigate } from "react-router-dom";
 import CheckIn from "../componeents/dashboard/CheckIn";
 
 export default function Member() {
   const navigate = useNavigate();
+  const { user } = useCheckInAuth();
 
   const getSeat = () => {
     navigate("./seats");
@@ -30,11 +32,8 @@ export default function Member() {
             ></img>
           </div>
           <div className="flex flex-col justify-center items-center">
-            <p className=" mb-[8px] lg:mb-[18px]"> Name: ifeanyi princewill</p>
-            <p className=" mb-[42px] lg:mb-[49px]">
-              {" "}
-              Email: ifeanyiPrincewill@gmail.com
-            </p>
+            <p className=" mb-[8px] lg:mb-[18px]">{`Name ${user?.name}`}</p>
+            <p className=" mb-[42px] lg:mb-[49px]">{`Email ${user?.email}`}</p>
           </div>
           <motion.button
             whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}

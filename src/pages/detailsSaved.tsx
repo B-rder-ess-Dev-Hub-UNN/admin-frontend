@@ -17,7 +17,7 @@ export default function SaveDetails() {
         >
           <img
             src="checked.jpg"
-            className="w-[67px] h-[67px] lg:w-[127px] mt-[29px] mb-[24px] lg:w-[127px] lg:h-[127px] lg:mb-[29px]"
+            className="w-[67px] h-[67px] lg:w-[127px] mt-[29px] mb-[24px]  lg:h-[127px] lg:mb-[29px]"
           ></img>
           <p className="text-[11px] lg:text-[17px] mb-[33px] lg:mb-[38px] text-center">
             Details of guest saved <br /> succesfully

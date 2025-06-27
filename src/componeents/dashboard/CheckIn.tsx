@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import setMemberContext from "../../context/isMemberContext";
+import { useCheckInAuth } from "../../context/checkInContext";
 import { ChartNoAxesCombined, CalendarCheck2 } from "lucide-react";
-import { FaUserPlus } from "react-icons/fa";
+import { FaUserPlus, FaArrowLeft } from "react-icons/fa";
 
 export default function CheckIn({ children }: { children?: React.ReactNode }) {
   const [email, setEmail] = useState("");
@@ -13,6 +13,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuStatus, setMenuStatus] = useState(false);
+  const { checkin, user } = useCheckInAuth();
 
   const isActive = (path: string) => location.pathname === path;
   function inputValidator() {
@@ -23,7 +24,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
   }
 
   function displayMenu() {
-    setMenuStatus(!menuStatus);
+    setMenuStatus(true);
   }
 
   const checkIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,11 +38,11 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
         });
 
         const data = await res.json();
+        const { token } = data.data;
 
         if (res.ok) {
-          //   localStorage.setItem("token", data.token);
-          if (data.data.isMember) {
-            setMemberContext(true);
+          checkin(token);
+          if (user?.isMember) {
             navigate("./member");
           } else navigate("./nonMember");
         } else {
@@ -61,10 +62,15 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
     <div
       className={`${
         menuStatus
-          ? "block absolute right-[79px]~ top-[42px] lg:right-[283px] bg-white"
+          ? "block absolute  top-[81px] right-0 lg:top-[42px] lg:right-0 shadow rounded-tl rounded-bl bg-white"
           : "hidden"
       }`}
     >
+      <img
+        onClick={() => setMenuStatus(false)}
+        className="w-[20px] h-[20px] ml-[163px] mr-[22px] mt-[21px]"
+        src="Frame.png"
+      ></img>
       <Link to="/check-ins">
         <motion.div
           className={`flex items-center px-6 py-3 ${
@@ -73,7 +79,11 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
           whileHover={{ x: 5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <img src="/chair.png" className="mr-4 w-6" alt="Check In's" />
+          <img
+            src="/chair.png"
+            className=" ml-[25px] mr-4 w-6"
+            alt="Check In's"
+          />
           <span>Check In's</span>
         </motion.div>
       </Link>
@@ -85,7 +95,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
           whileHover={{ x: 5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <ChartNoAxesCombined className="mr-4" size={20} />
+          <ChartNoAxesCombined className="mr-4 ml-[25px]" size={20} />
           <span>Statistics</span>
         </motion.div>
       </Link>
@@ -97,7 +107,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
           whileHover={{ x: 5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <FaUserPlus className="mr-4" size={20} />
+          <FaUserPlus className="mr-4 ml-[25px]" size={20} />
           <span>Register</span>
         </motion.div>
       </Link>
@@ -109,9 +119,21 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
           whileHover={{ x: 5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <CalendarCheck2 className="mr-4" size={20} />
+          <CalendarCheck2 className="mr-4 ml-[25px]" size={20} />
           <span>Schedule</span>
         </motion.div>
+      </Link>
+      <Link to="*">
+        <motion.div
+          className={`flex items-center px-6 py-3 mt-[127px] ${
+            isActive("/schedule") ? "font-bold bg-gray-100" : ""
+          }`}
+          whileHover={{ x: 5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <FaArrowLeft className="mr-2 ml-[25px]" size={20} />
+          <span>Back to site</span>
+        </motion.div>{" "}
       </Link>
     </div>
   );
@@ -132,7 +154,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
           <img
             onClick={displayMenu}
             className="w-[17px] h-[17px] lg:w-[33px] lg:h-[33px]"
-            src={`${menuStatus ? "redChecked.jpg" : "menu.png"}`}
+            src="menu.png"
           ></img>
         </div>
 
@@ -168,7 +190,10 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
                 whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
                 whileHover={{ backgroundColor: "#F4C400" }}
                 transition={{ type: "spring", stiffness: "300" }}
-                className=" h-[31px] w-[98px] mb-[35px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded"
+                className={` h-[31px] w-[98px] mb-[35px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
+                  children ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={!!children}
               >
                 {" "}
                 Check in
@@ -189,7 +214,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
             initial="closed"
             animate="open"
             exit="closed"
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.5 }}
           >
             {menuContent}
           </motion.div>

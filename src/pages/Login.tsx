@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../context/authContext";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +9,7 @@ export default function Login() {
   const [confirmPass, setConfirmPass] = useState("");
   const [errorMessage, setErroMessage] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   function inputValidator() {
     if (password != confirmPass) {
@@ -33,7 +35,7 @@ export default function Login() {
         const { token } = data.data;
 
         if (res.ok) {
-          localStorage.setItem("token", token);
+          login(token);
           navigate("./checkIn");
         } else {
           setErroMessage(data.message);

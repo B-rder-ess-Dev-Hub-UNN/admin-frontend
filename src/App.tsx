@@ -4,15 +4,11 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-
-import { useState } from "react";
-import { useEffect } from "react";
-
 import CheckIns from "./pages/dashboard/CheckInsPage";
 import Schedule from "./pages/dashboard/SchedulePage";
 import Register from "./pages/dashboard/RegisterPage";
 import Statistics from "./pages/dashboard/StatisticsPage";
-
+import { useAuth } from "./context/authContext";
 import Login from "./pages/Login";
 import CheckIn from "./componeents/dashboard/CheckIn";
 import Member from "./pages/Member";
@@ -23,36 +19,8 @@ import GuestDetails from "./pages/guestDetails";
 import SaveDetails from "./pages/detailsSaved";
 import DashboardLayout from "./componeents/dashboard/dashBoardLayout";
 
-// const override: React.CSSProperties = {
-//   display: "block",
-//   margin: "0 auto",
-//   borderColor: "red",
-// };
-
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("token");
-    setIsLoggedIn(!!storedUser);
-  }, []);
-  // const isLoggedIn = true;
-
-  // if (isLoggedIn === null) {
-  //   return (
-  //     <div>
-  //       {" "}
-  //       <CircleLoader
-  //         // color={color}
-  //         // loading={loading}
-  //         cssOverride={override}
-  //         size={15}
-  //         aria-label="Loading Spinner"
-  //         data-testid="loader"
-  //       />
-  //     </div>
-  //   );
-  // }
+  const { isLoggedIn } = useAuth();
 
   return (
     <Router>
