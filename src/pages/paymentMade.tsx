@@ -5,7 +5,7 @@ export default function PaymentMade() {
   const navigate = useNavigate();
 
   const enterDetails = () => {
-    navigate("/enterDetails");
+    navigate("/checkIn");
   };
   return (
     <div>
@@ -42,7 +42,8 @@ export default function PaymentMade() {
             transition={{ type: "spring", stiffness: "300" }}
             className="bg-[#FFDD00] text-[15px] font-bold items-center w-[123px] h-[35px] mb-[33px] lg:w-[293px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px]"
           >
-            Enter details
+            {" "}
+            Back to check-In page
           </motion.button>
           <p className="text-center mb-[46px] lg:mr-[23.57px] lg:ml-[27px] lg:text-[17px]">
             You now have access to make use of the Borderless <br /> web3

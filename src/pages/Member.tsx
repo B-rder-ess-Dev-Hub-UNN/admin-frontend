@@ -9,7 +9,7 @@ export default function Member() {
   const { user } = useCheckInAuth();
 
   const getSeat = () => {
-    navigate("./seats");
+    navigate("/seats");
   };
   return (
     <div>

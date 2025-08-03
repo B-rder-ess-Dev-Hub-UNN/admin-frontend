@@ -1,14 +1,20 @@
 import { useState } from "react";
-import { useAuth } from "../context/authContext";
+// import { useAuth } from "../context/authContext";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/authContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const [showpassword, setshowpassword] = useState(false);
+  const [showconfirmpassword, setshowconfirmpassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [loading, setloading] = useState(false);
   const [confirmPass, setConfirmPass] = useState("");
   const [errorMessage, setErroMessage] = useState("");
   const navigate = useNavigate();
+
   const { login } = useAuth();
 
   function inputValidator() {
@@ -22,34 +28,23 @@ export default function Login() {
   }
   const logIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (inputValidator()) {
-      try {
-        const res = await fetch("*/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-
-        const data = await res.json();
-
-        const { token } = data.data;
-
-        if (res.ok) {
-          login(token);
-          navigate("./checkIn");
-        } else {
-          setErroMessage(data.message);
-        }
-      } catch (err) {
-        setErroMessage("Network error");
-      }
+    if (!inputValidator()) return;
+    setloading(true);
+    try {
+      await login({ email, password });
+      navigate("/checkIn");
+      console.log("navigating");
+    } catch (error: any) {
+      setErroMessage(error.message);
+    } finally {
+      setloading(false);
     }
   };
   return (
     <>
       <div className="flex flex-col mx-auto  w-full h-screen overflow-auto ">
         <img
-          className=" w-[82px] h-[94px] mx-auto mt-[154px] lg:w-[125px] lg:h-[143.88px] lg:mt-[2px]"
+          className=" w-[82px] h-[94px] mx-auto mt-[100px] lg:w-[125px] lg:h-[143.88px] lg:mt-[2px]"
           src="avatar.jpg"
         ></img>
         <img
@@ -60,19 +55,6 @@ export default function Login() {
           {" "}
           Tech club unn
         </h1>
-        <p className="mb-[26px] lg:mb-[30px] text-center">
-          <span className=" font-bold">BTC UNN</span> a web3 student based
-          community to <br />
-          designed to faster growth and train tech enthusiast and bring them{" "}
-          <br /> On-chain
-          <br />
-        </p>
-        <p className="mb-[59px] lg:mb-[33px] text-center">
-          {" "}
-          This is the official login page to users of the{" "}
-          <span className="font-bold">hub </span>
-          <br /> including members and non-members
-        </p>
         <p className="font-bold text-center"> ADMIN Log In</p>
         <form onSubmit={logIn} className="mx-auto flex flex-col items-center">
           <input
@@ -81,36 +63,68 @@ export default function Login() {
             autoComplete="off"
             onChange={(e) => setEmail(e.target.value)}
             value={email}
-            className="mt-[20px] p-[10px] w-[283px] h-[32px] lg:w-[541px] lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
+            className="placeholder:opacity-50 placeholder:text-sm placeholder:italic mt-[20px] p-[10px] w-[283px] h-[32px] lg:w-[541px] lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
             type="text"
           ></input>
           <br />
-          <input
-            id="password"
-            placeholder="Password"
-            autoComplete="new-password"
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            className="mt-[20px] p-[10px] w-[283px] h-[32px] lg:w-[541px] lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
-            type="password"
-          ></input>
+          <div className="relative w-full">
+            {" "}
+            <input
+              id="password"
+              placeholder="Password"
+              autoComplete="current-password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+              className="placeholder:opacity-50 placeholder:text-sm placeholder:italic mt-[20px] p-[10px] w-[283px] h-[32px] lg:w-[541px] lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
+              type={`${showpassword ? "text" : "password"}`}
+            ></input>
+            <button
+              type="button"
+              onClick={() => setshowpassword(!showpassword)}
+              className="absolute right-[8px] top-[10px] lg:right-[21px] lg:top-[21px]"
+            >
+              {showpassword ? (
+                <Eye className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
+              ) : (
+                <EyeOff className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
+              )}
+            </button>
+          </div>
+
           <br />
-          <input
-            id="confirmPassword"
-            placeholder="Confirm password"
-            autoComplete="new-password"
-            onChange={(e) => setConfirmPass(e.target.value)}
-            value={confirmPass}
-            className="mt-[20px] p-[10px] w-[283px] h-[32px]  lg:w-[541px]  lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
-            type="password"
-          ></input>
+          <div className="relative w-full">
+            {" "}
+            <input
+              id="confirmPassword"
+              placeholder="Confirm password"
+              autoComplete="current-password"
+              onChange={(e) => setConfirmPass(e.target.value)}
+              value={confirmPass}
+              className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic mt-[20px] p-[10px] w-[283px] h-[32px]  lg:w-[541px]  lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
+              type={`${showconfirmpassword ? "text" : "password"}`}
+            ></input>
+            <button
+              type="button"
+              onClick={() => setshowconfirmpassword(!showconfirmpassword)}
+              className="absolute right-[8px] top-[10px] lg:right-[21px] lg:top-[21px]"
+            >
+              {showconfirmpassword ? (
+                <Eye className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
+              ) : (
+                <EyeOff className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
+              )}
+            </button>
+          </div>
+
           <br />
           <p className="text-red-500 mb-[10px] text-[20px]">{errorMessage}</p>
           <motion.button
             whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
             whileHover={{ backgroundColor: "#F4C400" }}
             transition={{ type: "spring", stiffness: "300" }}
-            className=" w-[85px] h-[31px] mt-[39px] lg:w-[176px] lg:h-[60px] bg-[#FFDD00] lg:mt-[29px] ml-"
+            className={` ${
+              loading && "opacity-50 cursor-not-allowed"
+            }w-[85px] h-[31px] mb-[20px] mt-[39px] lg:w-[176px] lg:h-[60px] bg-[#FFDD00] lg:mt-[29px] ml-`}
           >
             Log in
           </motion.button>

@@ -1,11 +1,48 @@
 import CheckIn from "../componeents/dashboard/CheckIn";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { paymentPlans, paymentConfirm } from "../../services/apis/payment";
+import { bookSeat } from "../../services/apis/seat";
+import type { Plan } from "../../services/apis/payment";
 
 export default function NonMember() {
   const navigate = useNavigate();
-  const getSeat = () => {
-    navigate("/seats");
+  const [plans, setPlans] = useState<Plan[]>([]);
+
+  useEffect(() => {
+    try {
+      const controller = new AbortController();
+
+      async function plans() {
+        const res = await paymentPlans({ signal: controller.signal });
+        const plans_array = res.data;
+        setPlans(plans_array);
+      }
+      plans();
+      return () => controller.abort();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  async function handlePayment(
+    user_id: string,
+    plan_id: string,
+    expires_at: string
+  ) {
+    try {
+      await paymentConfirm({ user_id, plan_id, expires_at });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const paymentMade = async () => {
+    const seat_id = localStorage.getItem("seat_id");
+    const user_id = localStorage.getItem("user_id");
+
+    seat_id && user_id && (await bookSeat({ seat_id, user_id }));
+    navigate("/paymentMade");
   };
   return (
     <div>
@@ -40,15 +77,40 @@ export default function NonMember() {
               <div className="flex flex-row">
                 <div className="flex flex-col text-[13px] lg:text-[23px] mr-[200px] lg:mr-[169px]">
                   <p className=" mb-[24px] lg:mb-[21px]">Hours</p>
-                  <p className=" mb-[22px] lg:mb-[15px]">1 Hour</p>
-                  <p className=" mb-[22px] lg:mb-[15px]">2 Hours</p>
-                  <p>3 Hours</p>
+                  {plans.map((plan) => (
+                    <p className=" mb-[22px] lg:mb-[15px]">{plan.name}</p>
+                  ))}
                 </div>
                 <div className="flex flex-col text-[13px] lg:text-[23px] mr-[29px] lg:mr-[18px]">
                   <p className=" mb-[24px] lg:mb-[21px]">Amount</p>
-                  <p className=" mb-[22px] lg:mb-[15px]">500</p>
-                  <p className=" mb-[22px] lg:mb-[15px]">1500</p>
-                  <p>2500</p>
+                  {plans.map((plan) => (
+                    <div className="flex flex-row">
+                      <p className=" mb-[22px] mr-[5px] lg:mb-[15px]">
+                        {plan.price}
+                      </p>
+                      <button
+                        className="bg-[#04252D] w-[50px] h-[20px] lg:w-[100px] lg:h-[30px]"
+                        onClick={() => {
+                          const id = localStorage.getItem("user_id");
+                          let hours = 0;
+                          if (plan.name === "Full Day") {
+                            hours = 24;
+                          } else if (plan.name === "Half Day") {
+                            hours = 12;
+                          } else if (plan.name === "Hourly") {
+                            hours = 1;
+                          }
+                          const expires_at = new Date(
+                            Date.now() + hours * 60 * 60 * 1000
+                          ).toISOString();
+
+                          id && handlePayment(id, plan.id, expires_at);
+                        }}
+                      >
+                        pay
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -57,10 +119,10 @@ export default function NonMember() {
                   whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
                   whileHover={{ backgroundColor: "#F4C400" }}
                   transition={{ type: "spring", stiffness: "300" }}
-                  onClick={getSeat}
+                  onClick={paymentMade}
                   className="bg-[#04252D] text-white w-[169px] h-[38px] mb-[38px] mt-[38px] lg:w-[293px] lg:h-[59px]  lg:mb-[48px]"
                 >
-                  Check for seat
+                  Payment Made
                 </motion.button>
                 <p className="text-center text-[13px] lg:mr-[23.57px]  lg:text-[17px]">
                   You now have access to make use of the Borderless <br /> web3

@@ -3,17 +3,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { useCheckInAuth } from "../../context/checkInContext";
 import { ChartNoAxesCombined, CalendarCheck2 } from "lucide-react";
 import { FaUserPlus, FaArrowLeft } from "react-icons/fa";
+import { useCheckInAuth } from "../../context/checkInContext";
 
 export default function CheckIn({ children }: { children?: React.ReactNode }) {
   const [email, setEmail] = useState("");
+  const [loading, setloading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const [menuStatus, setMenuStatus] = useState(false);
-  const { checkin, user } = useCheckInAuth();
+  const { checkin } = useCheckInAuth();
 
   const isActive = (path: string) => location.pathname === path;
   function inputValidator() {
@@ -29,28 +30,21 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
 
   const checkIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (inputValidator()) {
-      try {
-        const res = await fetch("*", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-
-        const data = await res.json();
-        const { token } = data.data;
-
-        if (res.ok) {
-          checkin(token);
-          if (user?.isMember) {
-            navigate("./member");
-          } else navigate("./nonMember");
-        } else {
-          setErrorMessage(data.message);
-        }
-      } catch (error) {
-        setErrorMessage("Network issue");
-      }
+    if (!inputValidator()) return;
+    setloading(true);
+    try {
+      const user = await checkin({ email });
+      const user_details = user.data;
+      localStorage.setItem("name", user_details.name);
+      localStorage.setItem("user", user_details.email);
+      localStorage.setItem("user_id", user_details.id);
+      navigate("/isMember");
+    } catch (error: any) {
+      if (error.message === "No user found with this email") {
+        navigate("/enterDetails");
+      } else setErrorMessage("something went wrong");
+    } finally {
+      setloading(false);
     }
   };
   const variants = {
@@ -181,7 +175,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
                 type="email"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
-                className=" w-[283px] h-[32px] mb-[40px] lg:mb-[129px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+                className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[129px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
               ></input>
               <p className="text-red-500 mb-[10px] text-[20px]">
                 {errorMessage}
@@ -190,7 +184,9 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
                 whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
                 whileHover={{ backgroundColor: "#F4C400" }}
                 transition={{ type: "spring", stiffness: "300" }}
-                className={` h-[31px] w-[98px] mb-[35px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
+                className={`  ${
+                  loading && "opacity-50 cursor-not-allowed"
+                }h-[31px] w-[98px] mb-[35px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
                   children ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={!!children}

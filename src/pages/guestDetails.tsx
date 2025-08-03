@@ -1,21 +1,36 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { captureNonMember } from "../../services/apis/member";
+import { ChartNoAxesCombined, CalendarCheck2 } from "lucide-react";
+import { FaUserPlus, FaArrowLeft } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function GuestDetails({
   children,
 }: {
   children?: React.ReactNode;
 }) {
-  const [name, setName] = useState("");
+  const [menuStatus, setMenuStatus] = useState(false);
+  const [loading, setloading] = useState(false);
+  const [user_name, set_user_name] = useState("");
   const [email, setEmail] = useState("");
-  const [number, setNumber] = useState<number | string>();
+  const [whatsapp_number, set_whatsapp_number] = useState("");
+  const [department, setDepartment] = useState("");
+  const [tech_stack, settech_stack] = useState("");
+  const [date_of_birth, setdate_of_birth] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const variants = {
+    open: { opacity: 1, height: "auto" },
+    closed: { opacity: 0, height: 0 },
+  };
   function inputValidator() {
-    if (name === "" || email === "" || number === "") {
+    if (user_name === "" || email === "" || !whatsapp_number) {
       setErrorMessage("fill in all fields");
       return false;
     } else return true;
@@ -24,29 +39,114 @@ export default function GuestDetails({
   const saveDetails = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (inputValidator()) {
+      setloading(true);
       try {
-        const res = await fetch("", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, number }),
+        const res = await captureNonMember({
+          user_name,
+          email,
+          whatsapp_number,
+          department,
+          tech_stack,
+          date_of_birth,
         });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          navigate("./detailSaved");
-        } else {
-          setErrorMessage(data.message);
-        }
-      } catch (err) {
-        setErrorMessage("network error");
+        const capture_details = res.data;
+        localStorage.setItem("user_id", capture_details.id);
+        navigate("/detailSaved");
+      } catch (err: any) {
+        setErrorMessage(`${err.message}`);
+      } finally {
+        setloading(false);
       }
     }
   };
 
+  const menuContent = (
+    <div
+      className={`${
+        menuStatus
+          ? "block absolute  top-[81px] right-0 lg:top-[42px] lg:right-0 shadow rounded-tl rounded-bl bg-white"
+          : "hidden"
+      }`}
+    >
+      <img
+        onClick={() => setMenuStatus(false)}
+        className="w-[20px] h-[20px] ml-[163px] mr-[22px] mt-[21px]"
+        src="Frame.png"
+      ></img>
+      <Link to="/check-ins">
+        <motion.div
+          className={`flex items-center px-6 py-3 ${
+            isActive("/check-ins") ? "font-bold bg-gray-100" : ""
+          }`}
+          whileHover={{ x: 5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <img
+            src="/chair.png"
+            className=" ml-[25px] mr-4 w-6"
+            alt="Check In's"
+          />
+          <span>Check In's</span>
+        </motion.div>
+      </Link>
+      <Link to="/statistics">
+        <motion.div
+          className={`flex items-center px-6 py-3 ${
+            isActive("/statistics") ? "font-bold bg-gray-100" : ""
+          }`}
+          whileHover={{ x: 5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <ChartNoAxesCombined className="mr-4 ml-[25px]" size={20} />
+          <span>Statistics</span>
+        </motion.div>
+      </Link>
+      <Link to="/register">
+        <motion.div
+          className={`flex items-center px-6 py-3 ${
+            isActive("/register") ? "font-bold bg-gray-100" : ""
+          }`}
+          whileHover={{ x: 5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <FaUserPlus className="mr-4 ml-[25px]" size={20} />
+          <span>Register</span>
+        </motion.div>
+      </Link>
+      <Link to="/schedule">
+        <motion.div
+          className={`flex items-center px-6 py-3 ${
+            isActive("/schedule") ? "font-bold bg-gray-100" : ""
+          }`}
+          whileHover={{ x: 5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <CalendarCheck2 className="mr-4 ml-[25px]" size={20} />
+          <span>Schedule</span>
+        </motion.div>
+      </Link>
+      <Link to="*">
+        <motion.div
+          className={`flex items-center px-6 py-3 mt-[127px] ${
+            isActive("/schedule") ? "font-bold bg-gray-100" : ""
+          }`}
+          whileHover={{ x: 5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <FaArrowLeft className="mr-2 ml-[25px]" size={20} />
+          <span>Back to site</span>
+        </motion.div>{" "}
+      </Link>
+    </div>
+  );
+
   return (
     <div className="relative">
-      <div className="relative flex flex-col blur-sm min-h-screen w-full overflow-auto ">
+      <div
+        className={`relative flex flex-col ${
+          children && "blur-sm"
+        }  min-h-screen w-full overflow-auto `}
+      >
         <div className=" flex flex-row  w-[305px] h-[32px] mt-[42px] mb-[69px] lg:w-[1015px] lg:h-[75px] mx-auto lg:mt-[60px] lg:mb-[117px] border-b-5 border-l-2 border-r-2 border-[#FFDD00] border-solid rounded">
           <div className=" flex items-end mb-[20px]">
             <img
@@ -58,6 +158,7 @@ export default function GuestDetails({
             </p>
           </div>
           <img
+            onClick={() => setMenuStatus(true)}
             className="w-[17px] h-[17px] lg:w-[33px] lg:h-[33px]"
             src="menu.png"
           ></img>
@@ -86,9 +187,9 @@ export default function GuestDetails({
                 id="name"
                 placeholder="Name..."
                 type="text"
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                className=" w-[283px] h-[32px] mb-[40px] lg:mb-[37px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+                onChange={(e) => set_user_name(e.target.value)}
+                value={user_name}
+                className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[37px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
               ></input>{" "}
               <br />
               <input
@@ -97,18 +198,42 @@ export default function GuestDetails({
                 type="email"
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
-                className=" w-[283px] h-[32px] mb-[40px] lg:mb-[37px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+                className="placeholder:opacity-50 placeholder:text-sm placeholder:italic  w-[283px] h-[32px] mb-[40px] lg:mb-[37px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
               ></input>
               <br />
               <input
                 id="number"
-                placeholder="Phone number"
-                type="number"
-                onChange={(e) => setNumber(e.target.value)}
-                value={number}
-                className=" w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+                placeholder="whatsapp number"
+                type="string"
+                onChange={(e) => set_whatsapp_number(e.target.value)}
+                value={whatsapp_number}
+                className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
               ></input>{" "}
               <br />
+              <input
+                id="department"
+                placeholder="department"
+                type="string"
+                onChange={(e) => setDepartment(e.target.value)}
+                value={department}
+                className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+              ></input>
+              <input
+                id="tech_stack"
+                placeholder="tech_stack"
+                type="string"
+                onChange={(e) => settech_stack(e.target.value)}
+                value={tech_stack}
+                className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+              ></input>
+              <input
+                id="date_of_birth"
+                placeholder="date_of_birth"
+                type="date"
+                onChange={(e) => setdate_of_birth(e.target.value)}
+                value={date_of_birth}
+                className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+              ></input>
               <p className="text-red-500 mb-[10px] text-[20px]">
                 {errorMessage}
               </p>
@@ -116,7 +241,9 @@ export default function GuestDetails({
                 whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
                 whileHover={{ backgroundColor: "#F4C400" }}
                 transition={{ type: "spring", stiffness: "300" }}
-                className={`text-[15px] font-bold h-[37px] w-[77px] mb-[35px] lg:text-[25px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
+                className={` ${
+                  loading && "opacity-50 cursor-not-allowed"
+                }text-[15px] font-bold h-[37px] w-[77px] mb-[35px] lg:text-[25px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
                   children ? "opacity-50 cursor-not-allowed" : " "
                 }`}
                 disabled={!!children}
@@ -133,6 +260,19 @@ export default function GuestDetails({
         </div>
       </div>
       {children}
+      <AnimatePresence>
+        {menuStatus && (
+          <motion.div
+            variants={variants}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            transition={{ duration: 0.5 }}
+          >
+            {menuContent}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
