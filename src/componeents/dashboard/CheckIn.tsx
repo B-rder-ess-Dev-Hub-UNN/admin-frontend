@@ -38,11 +38,10 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
       localStorage.setItem("name", user_details.name);
       localStorage.setItem("user", user_details.email);
       localStorage.setItem("user_id", user_details.id);
-      navigate("/isMember");
+      if (user_details.is_member) navigate("/isMember");
+      else navigate("/enterDetails");
     } catch (error: any) {
-      if (error.message === "No user found with this email") {
-        navigate("/enterDetails");
-      } else setErrorMessage("something went wrong");
+      setErrorMessage("something went wrong");
     } finally {
       setloading(false);
     }
@@ -186,7 +185,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
                 transition={{ type: "spring", stiffness: "300" }}
                 className={`  ${
                   loading && "opacity-50 cursor-not-allowed"
-                }h-[31px] w-[98px] mb-[35px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
+                }h-[31px] w-[98px] mb-[35px] text-center p-[10px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded ${
                   children ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={!!children}

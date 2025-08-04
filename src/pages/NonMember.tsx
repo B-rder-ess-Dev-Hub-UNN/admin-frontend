@@ -84,32 +84,27 @@ export default function NonMember() {
                 <div className="flex flex-col text-[13px] lg:text-[23px] mr-[29px] lg:mr-[18px]">
                   <p className=" mb-[24px] lg:mb-[21px]">Amount</p>
                   {plans.map((plan) => (
-                    <div className="flex flex-row">
-                      <p className=" mb-[22px] mr-[5px] lg:mb-[15px]">
-                        {plan.price}
-                      </p>
-                      <button
-                        className="bg-[#04252D] w-[50px] h-[20px] lg:w-[100px] lg:h-[30px]"
-                        onClick={() => {
-                          const id = localStorage.getItem("user_id");
-                          let hours = 0;
-                          if (plan.name === "Full Day") {
-                            hours = 24;
-                          } else if (plan.name === "Half Day") {
-                            hours = 12;
-                          } else if (plan.name === "Hourly") {
-                            hours = 1;
-                          }
-                          const expires_at = new Date(
-                            Date.now() + hours * 60 * 60 * 1000
-                          ).toISOString();
+                    <button
+                      className="bg-[#04252D] text-white w-[100px] h-[30px] mb-[22px] mr-[5px] lg:mb-[15px] lg:w-[150px] lg:h-[50px]"
+                      onClick={() => {
+                        const id = localStorage.getItem("user_id");
+                        let hours = 0;
+                        if (plan.name === "Full Day") {
+                          hours = 24;
+                        } else if (plan.name === "Half Day") {
+                          hours = 12;
+                        } else if (plan.name === "Hourly") {
+                          hours = 1;
+                        }
+                        const expires_at = new Date(
+                          Date.now() + hours * 60 * 60 * 1000
+                        ).toISOString();
 
-                          id && handlePayment(id, plan.id, expires_at);
-                        }}
-                      >
-                        pay
-                      </button>
-                    </div>
+                        id && handlePayment(id, plan.id, expires_at);
+                      }}
+                    >
+                      {plan.price}
+                    </button>
                   ))}
                 </div>
               </div>

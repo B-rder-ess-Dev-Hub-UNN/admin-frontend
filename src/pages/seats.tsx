@@ -20,6 +20,7 @@ export default function Seats() {
   const [refresh, setRefresh] = useState(0);
   const [booked_seat, setbooked_seat] = useState<BookSeat>();
   const [display_box, setDisplay_box] = useState(false);
+  const [seat_is_taken, setSeat_is_taken] = useState(false);
   const [current_seat, setcurrent_seat] = useState<string>("");
   const navigate = useNavigate();
   const [seat, setSeat] = useState<Seats[]>([]);
@@ -52,27 +53,29 @@ export default function Seats() {
     navigate("/checkIn");
     return res;
   }
+
+  function check_if_seat_is_taken(seatID: string) {
+    if (seatID == current_seat) return true;
+  }
   const proceed = async () => {
     if (booked_seat) {
       localStorage.setItem("seat_id", booked_seat.seat_id);
     }
-    user?.msg === "Hub user exists"
-      ? navigate("/checkIn")
-      : navigate("/nonMember");
+    user?.isMember ? navigate("/checkIn") : navigate("/nonMember");
   };
   function seatRow(seatNum1: Seats, seatNum2: Seats) {
     return (
       <div className="flex flex-row ">
         {[seatNum1, seatNum2].map((seat, id) => (
           <div
-            className={`flex flex-col mb-[29px] mr-[19px] lg:mb-[18px] lg:mr-[23px] ${
-              seat.is_taken ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+            className={`flex flex-col mb-[29px] mr-[19px] lg:mb-[18px] lg:mr-[23px] cursor-pointer ${
+              seat.is_taken && "opacity-50"
             }`}
             key={id}
             onClick={() => {
-              if (seat.is_taken) return;
-              setDisplay_box(!display_box);
               setcurrent_seat(seat.id);
+              if (check_if_seat_is_taken(seat.id)) setSeat_is_taken(true);
+              setDisplay_box(!display_box);
             }}
           >
             <p className="text-center">{seat.seat_number}</p>
@@ -96,7 +99,7 @@ export default function Seats() {
   if (seat.length < 10) {
     return (
       <CheckIn>
-        <div className="text-center mt-100 text-lg font-bold text-[39px]">
+        <div className="text-center mt-10 text-lg font-bold text-[29px]">
           Loading seats...
         </div>
       </CheckIn>
@@ -127,7 +130,7 @@ export default function Seats() {
         <motion.button
           onClick={() => {
             if (!user_id) {
-              console.log("useridnot available");
+              console.log("userid not available");
             } else {
               setbooked_seat({ user_id: user_id, seat_id: current_seat });
               setDisplay_box(false);
@@ -136,7 +139,9 @@ export default function Seats() {
           whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
           whileHover={{ backgroundColor: "#F4C400" }}
           transition={{ type: "spring", stiffness: "300" }}
-          className="bg-[#FFDD00] text-[15px] font-bold items-center w-[123px] h-[35px] mb-[33px] lg:w-[293px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px]"
+          className={`bg-[#FFDD00] text-[15px] font-bold items-center w-[123px] h-[35px] mb-[33px] lg:w-[293px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px] ${
+            seat_is_taken && "cursor-not-allowed opacity-50"
+          }`}
         >
           {" "}
           Book Seat
@@ -165,14 +170,14 @@ export default function Seats() {
   return (
     <div>
       <CheckIn>
-        <div className="">
+        <div>
           <motion.div
-            className="absolute flex flex-col lg:flex-row bg-white border-solid rounded border-1 border-yellow-400 w-full left-0 bottom-0 lg:left-[191.87px]  lg:top-[215px] lg:max-w-[1129px] lg:max-h-[682px]"
+            className="absolute flex flex-col lg:flex-row bg-white border-solid rounded border-1 border-yellow-400 w-full max-h-[692px] left-0 bottom-0 lg:left-[191.87px]  lg:top-[215px] lg:max-w-[1129px] lg:max-h-[682px]"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className=" block lg:hidden absolute top-0 left-0 w-full bg-white z-10 py-2">
+            <div className=" block lg:hidden bg-white  py-2">
               <h1 className="text-[15px] mt-[34px] font-bold text-center">
                 Sitting Arrangement
               </h1>
@@ -190,11 +195,11 @@ export default function Seats() {
               </div>
             </div>
 
-            <div className="flex flex-col lg:ml-[28px] lg:mt-[238px]">
+            <div className="flex flex-col items-center  mt-[20px] lg:mt-[238px]">
               <RefreshCw
                 onClick={() => setRefresh((prev) => prev + 1)}
                 size={20}
-                className="cursor-pointer w-6 h-6 text-black hover:text-yellow-500 transition"
+                className="cursor-pointer w-6 h-6 text-black mb-[10px] hover:text-yellow-500 transition"
               />
               <motion.button
                 whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}

@@ -8,20 +8,16 @@ import { useAuth } from "../context/authContext";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [showpassword, setshowpassword] = useState(false);
-  const [showconfirmpassword, setshowconfirmpassword] = useState(false);
   const [password, setPassword] = useState("");
   const [loading, setloading] = useState(false);
-  const [confirmPass, setConfirmPass] = useState("");
+
   const [errorMessage, setErroMessage] = useState("");
   const navigate = useNavigate();
 
   const { login } = useAuth();
 
   function inputValidator() {
-    if (password != confirmPass) {
-      setErroMessage("password not the same");
-      return false;
-    } else if (email == "" || password == "" || confirmPass == "") {
+    if (email == "" || password == "") {
       setErroMessage("fill in all fields");
       return false;
     } else return true;
@@ -81,34 +77,9 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setshowpassword(!showpassword)}
-              className="absolute right-[8px] top-[10px] lg:right-[21px] lg:top-[21px]"
+              className="absolute right-[8px] top-[25px] lg:right-[21px] lg:top-[35px]"
             >
               {showpassword ? (
-                <Eye className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
-              ) : (
-                <EyeOff className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
-              )}
-            </button>
-          </div>
-
-          <br />
-          <div className="relative w-full">
-            {" "}
-            <input
-              id="confirmPassword"
-              placeholder="Confirm password"
-              autoComplete="current-password"
-              onChange={(e) => setConfirmPass(e.target.value)}
-              value={confirmPass}
-              className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic mt-[20px] p-[10px] w-[283px] h-[32px]  lg:w-[541px]  lg:h-[62px] lg:mt-[16px] border-1 border-[#FFDD00] border-solid rounded"
-              type={`${showconfirmpassword ? "text" : "password"}`}
-            ></input>
-            <button
-              type="button"
-              onClick={() => setshowconfirmpassword(!showconfirmpassword)}
-              className="absolute right-[8px] top-[10px] lg:right-[21px] lg:top-[21px]"
-            >
-              {showconfirmpassword ? (
                 <Eye className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
               ) : (
                 <EyeOff className="w-[14px] h-[14px] lg:w-[20px] lg:h-[20px]" />
@@ -124,7 +95,7 @@ export default function Login() {
             transition={{ type: "spring", stiffness: "300" }}
             className={` ${
               loading && "opacity-50 cursor-not-allowed"
-            }w-[85px] h-[31px] mb-[20px] mt-[39px] lg:w-[176px] lg:h-[60px] bg-[#FFDD00] lg:mt-[29px] ml-`}
+            }w-[85px] h-[35px] text-center p-[10px] mb-[20px] mt-[39px] lg:w-[176px] lg:h-[60px] bg-[#FFDD00] lg:mt-[29px]`}
           >
             Log in
           </motion.button>
