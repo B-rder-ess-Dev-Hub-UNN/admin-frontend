@@ -83,8 +83,9 @@ export default function NonMember() {
                 </div>
                 <div className="flex flex-col text-[13px] lg:text-[23px] mr-[29px] lg:mr-[18px]">
                   <p className=" mb-[24px] lg:mb-[21px]">Amount</p>
-                  {plans.map((plan) => (
+                  {plans.map((plan, id) => (
                     <button
+                      key={id}
                       className="bg-[#04252D] text-white w-[100px] h-[30px] mb-[22px] mr-[5px] lg:mb-[15px] lg:w-[150px] lg:h-[50px]"
                       onClick={() => {
                         const id = localStorage.getItem("user_id");

@@ -20,10 +20,9 @@ export function CheckInProvider({ children }: { children?: React.ReactNode }) {
 
   async function checkin(data: any) {
     const res = await checkIfUserExists(data);
-    console.log(res);
+
     if (res.status == true) {
       const payload = res.data;
-      console.log(payload.is_member);
       setUser({
         msg: res.msg,
         name: payload.name,

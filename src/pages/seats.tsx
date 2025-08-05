@@ -20,8 +20,8 @@ export default function Seats() {
   const [refresh, setRefresh] = useState(0);
   const [booked_seat, setbooked_seat] = useState<BookSeat>();
   const [display_box, setDisplay_box] = useState(false);
-  const [seat_is_taken, setSeat_is_taken] = useState(false);
-  const [current_seat, setcurrent_seat] = useState<string>("");
+
+  const [current_seat, setcurrent_seat] = useState<Seats>();
   const navigate = useNavigate();
   const [seat, setSeat] = useState<Seats[]>([]);
 
@@ -54,9 +54,6 @@ export default function Seats() {
     return res;
   }
 
-  function check_if_seat_is_taken(seatID: string) {
-    if (seatID == current_seat) return true;
-  }
   const proceed = async () => {
     if (booked_seat) {
       localStorage.setItem("seat_id", booked_seat.seat_id);
@@ -68,13 +65,17 @@ export default function Seats() {
       <div className="flex flex-row ">
         {[seatNum1, seatNum2].map((seat, id) => (
           <div
-            className={`flex flex-col mb-[29px] mr-[19px] lg:mb-[18px] lg:mr-[23px] cursor-pointer ${
-              seat.is_taken && "opacity-50"
+            className={`flex flex-col mb-[29px] mr-[19px] lg:mb-[18px] lg:mr-[23px] cursor-pointer transition-transform duration-300 transform hover:scale-110 active:scale-105 hover:shadow-lg active:shadow-md   hover:border-gray-300 ${
+              seat.is_taken && "opacity-50 "
             }`}
             key={id}
             onClick={() => {
-              setcurrent_seat(seat.id);
-              if (check_if_seat_is_taken(seat.id)) setSeat_is_taken(true);
+              setcurrent_seat({
+                id: seat.id,
+                seat_number: seat.seat_number,
+                is_taken: seat.is_taken,
+              });
+              // if (check_if_seat_is_taken(seat.id)) setSeat_is_taken(true);
               setDisplay_box(!display_box);
             }}
           >
@@ -129,18 +130,18 @@ export default function Seats() {
       <div className="flex flex-row">
         <motion.button
           onClick={() => {
-            if (!user_id) {
-              console.log("userid not available");
-            } else {
-              setbooked_seat({ user_id: user_id, seat_id: current_seat });
-              setDisplay_box(false);
+            if (!user_id || current_seat?.is_taken) {
+              return;
             }
+            setbooked_seat({ user_id: user_id, seat_id: current_seat?.id! });
+            setDisplay_box(false);
           }}
+          disabled={!user_id || current_seat?.is_taken}
           whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
           whileHover={{ backgroundColor: "#F4C400" }}
           transition={{ type: "spring", stiffness: "300" }}
           className={`bg-[#FFDD00] text-[15px] font-bold items-center w-[123px] h-[35px] mb-[33px] lg:w-[293px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px] ${
-            seat_is_taken && "cursor-not-allowed opacity-50"
+            current_seat?.is_taken && "cursor-not-allowed opacity-50"
           }`}
         >
           {" "}
@@ -148,7 +149,7 @@ export default function Seats() {
         </motion.button>
         <motion.button
           onClick={() => {
-            checkOut({ seat_id: current_seat });
+            checkOut({ seat_id: current_seat?.id! });
             setDisplay_box(false);
           }}
           whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
