@@ -5,7 +5,8 @@ async function getrefreshtoken(token: string): Promise<string | null> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": "123#5", // if required by your backend
+      "x-api-key":
+        "3e75236e43afcdab7901ce8cfe02ef497906f38f137c5507669debd4babb03ff", // if required by your backend
     },
     body: JSON.stringify({ refresh_token: token }),
   });
@@ -25,7 +26,8 @@ export default async function apifetch<T>(
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-api-key": "123#5",
+    "x-api-key":
+      "3e75236e43afcdab7901ce8cfe02ef497906f38f137c5507669debd4babb03ff",
     ...(options.headers as Record<string, string>),
   };
 
