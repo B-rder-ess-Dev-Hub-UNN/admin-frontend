@@ -1,12 +1,11 @@
 const base_Url = "https://hubauthbackend-production.up.railway.app/";
-
+const api_key = import.meta.env.VITE_API_KEY;
 async function getrefreshtoken(token: string): Promise<string | null> {
   const res = await fetch(`${base_Url}api/v1/admin/token/refresh/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key":
-        "3e75236e43afcdab7901ce8cfe02ef497906f38f137c5507669debd4babb03ff", // if required by your backend
+      "x-api-key": `${api_key}`,
     },
     body: JSON.stringify({ refresh_token: token }),
   });
@@ -26,8 +25,7 @@ export default async function apifetch<T>(
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-api-key":
-      "3e75236e43afcdab7901ce8cfe02ef497906f38f137c5507669debd4babb03ff",
+    "x-api-key": `${api_key}`,
     ...(options.headers as Record<string, string>),
   };
 
