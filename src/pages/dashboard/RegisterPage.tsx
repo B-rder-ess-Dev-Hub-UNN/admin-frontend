@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { createMember } from "../../../services/apis/member";
 import HeaderProps from "../../componeents/dashboard/HeaderPros";
@@ -12,8 +11,7 @@ const Register = () => {
   const [tech_stack, settech_stack] = useState("");
   const [date_of_birth, setdate_of_birth] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
-  const navigate = useNavigate();
+  const [display_successful, set_display_successful] = useState(false);
 
   function inputValidator() {
     if (user_name === "" || email === "" || !whatsapp_number) {
@@ -36,7 +34,13 @@ const Register = () => {
           date_of_birth,
         });
         if (res.status == true) {
-          navigate("/detailSaved");
+          set_display_successful(true);
+          set_user_name("");
+          setDepartment("");
+          setEmail("");
+          set_whatsapp_number("");
+          setdate_of_birth("");
+          settech_stack("");
         }
       } catch (err: any) {
         setErrorMessage(`${err.message}`);
@@ -45,6 +49,35 @@ const Register = () => {
       }
     }
   };
+
+  const successful = (
+    <motion.div
+      className=" absolute flex flex-col justify-center items-center bg-white right-[30px] left-[30px] bottom-[100px] lg:max-h-[650px] lg:max-w-[831px] lg:top-[100px]  lg:left-[340px] border-1 border-yellow-400 border-solid rounded "
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <img
+        src="checked.jpg"
+        className="w-[67px] h-[67px] lg:w-[127px] mt-[29px] mb-[24px]  lg:h-[127px] lg:mb-[29px]"
+      ></img>
+      <p className="text-[11px] lg:text-[17px] mb-[33px] lg:mb-[38px] text-center">
+        Details saved <br /> succesfully
+      </p>
+      <motion.button
+        whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
+        whileHover={{ backgroundColor: "#F4C400" }}
+        transition={{ type: "spring", stiffness: "300" }}
+        onClick={() => set_display_successful(false)}
+        className=" w-[94px] h-[37px] mb-[29px] lg:mb-[52px] lg:w-[184px] lg:h-[60px] lg:text-[25px] bg-[#FFDD00] font-bold"
+      >
+        Proceed
+      </motion.button>
+      <p className="hidden text-center lg:block lg:mb-[30px]">
+        You now have acces to make use of the Borderless <br /> product house
+      </p>
+    </motion.div>
+  );
   return (
     <div className="h-full flex flex-col">
       <HeaderProps currentPage="Register" />
@@ -122,6 +155,7 @@ const Register = () => {
               Save
             </motion.button>
           </form>
+          {display_successful && successful}
         </motion.div>
       </div>
     </div>

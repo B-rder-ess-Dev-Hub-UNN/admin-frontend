@@ -47,13 +47,13 @@ export default async function apifetch<T>(
       localStorage.setItem("access_token", newToken);
       return apifetch<T>(endpoints, options, auth, false);
     } else {
-      throw new Error("Somthing wetin wroong.");
+      throw new Error("network connectivity issues.");
     }
   }
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => null);
-    throw new Error(errorBody?.msg || "Something went wrong.");
+    throw new Error(errorBody?.msg || "network connectivity issues");
   }
   return res.json();
 }

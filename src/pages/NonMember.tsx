@@ -3,12 +3,17 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { paymentPlans, paymentConfirm } from "../../services/apis/payment";
-import { bookSeat } from "../../services/apis/seat";
 import type { Plan } from "../../services/apis/payment";
 
 export default function NonMember() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [active_payment, set_active_payment] = useState(false);
+  const [error_message, set_error_message] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<{
+    name: string;
+    price: string;
+  } | null>(null);
 
   useEffect(() => {
     try {
@@ -21,8 +26,8 @@ export default function NonMember() {
       }
       plans();
       return () => controller.abort();
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      set_error_message(error.message);
     }
   }, []);
 
@@ -33,16 +38,20 @@ export default function NonMember() {
   ) {
     try {
       await paymentConfirm({ user_id, plan_id, expires_at });
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      set_error_message(error.message);
     }
   }
   const paymentMade = async () => {
-    const seat_id = localStorage.getItem("seat_id");
-    const user_id = localStorage.getItem("user_id");
+    try {
+      const seat_id = localStorage.getItem("seat_id");
+      const user_id = localStorage.getItem("user_id");
 
-    seat_id && user_id && (await bookSeat({ seat_id, user_id }));
-    navigate("/paymentMade");
+      seat_id && user_id;
+      navigate("/paymentMade");
+    } catch (error: any) {
+      set_error_message(error.message);
+    }
   };
   return (
     <div>
@@ -83,25 +92,32 @@ export default function NonMember() {
                 </div>
                 <div className="flex flex-col text-[13px] lg:text-[23px] mr-[29px] lg:mr-[18px]">
                   <p className=" mb-[24px] lg:mb-[21px]">Amount</p>
+                  {active_payment && selectedPlan && (
+                    <p className="text-center text-green-400 text-[25px] mb-2">{`To pay ₦${selectedPlan.price} for ${selectedPlan.name}`}</p>
+                  )}
+
                   {plans.map((plan, id) => (
                     <button
                       key={id}
-                      className="bg-[#04252D] text-white w-[100px] h-[30px] mb-[22px] mr-[5px] lg:mb-[15px] lg:w-[150px] lg:h-[50px]"
+                      className={`bg-[#04252D] text-white w-[100px] h-[30px] mb-[22px] mr-[5px] lg:mb-[15px] lg:w-[150px] lg:h-[50px] ${
+                        active_payment && "opacity-50 cursor-not-allowed"
+                      }`}
                       onClick={() => {
                         const id = localStorage.getItem("user_id");
                         let hours = 0;
-                        if (plan.name === "Full Day") {
-                          hours = 24;
-                        } else if (plan.name === "Half Day") {
-                          hours = 12;
-                        } else if (plan.name === "Hourly") {
-                          hours = 1;
-                        }
+
+                        if (plan.name === "Full Day") hours = 24;
+                        else if (plan.name === "Half Day") hours = 12;
+                        else if (plan.name === "Hourly") hours = 1;
+
                         const expires_at = new Date(
                           Date.now() + hours * 60 * 60 * 1000
                         ).toISOString();
 
                         id && handlePayment(id, plan.id, expires_at);
+
+                        setSelectedPlan({ name: plan.name, price: plan.price }); // 👈 store clicked plan
+                        set_active_payment(true); // just set it true (instead of toggling)
                       }}
                     >
                       {plan.price}
@@ -126,8 +142,12 @@ export default function NonMember() {
                 </p>
               </div>
             </div>
+            <p className="text-red-500 mb-[10px] text-[20px]">
+              {error_message}
+            </p>
           </motion.div>
         </div>
+        n
       </CheckIn>
     </div>
   );

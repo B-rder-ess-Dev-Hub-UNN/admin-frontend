@@ -34,14 +34,26 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
     setloading(true);
     try {
       const user = await checkin({ email });
-      const user_details = user.data;
-      localStorage.setItem("name", user_details.name);
-      localStorage.setItem("user", user_details.email);
-      localStorage.setItem("user_id", user_details.id);
-      if (user_details.is_member) navigate("/isMember");
-      else navigate("/enterDetails");
+      if (user.status == false) {
+        navigate("/enterDetails");
+      } else {
+        const user_details = user.data;
+        localStorage.setItem("name", user_details.name);
+        localStorage.setItem("user", user_details.email);
+        localStorage.setItem("user_id", user_details.id);
+
+        if (user_details.is_member) {
+          navigate("/isMember");
+        } else {
+          navigate("/enterDetails");
+        }
+      }
     } catch (error: any) {
-      setErrorMessage("something went wrong");
+      setErrorMessage(
+        `${
+          error.message == "failed to fetch" ? "network error" : error.message
+        }`
+      );
     } finally {
       setloading(false);
     }
@@ -116,7 +128,7 @@ export default function CheckIn({ children }: { children?: React.ReactNode }) {
           <span>Schedule</span>
         </motion.div>
       </Link>
-      <Link to="*">
+      <Link to="/checkIn">
         <motion.div
           className={`flex items-center px-6 py-3 mt-[127px] ${
             isActive("/schedule") ? "font-bold bg-gray-100" : ""

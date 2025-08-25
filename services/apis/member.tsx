@@ -53,7 +53,7 @@ export function createMember(payload: {
 }
 
 export function checkIfUserExists(data: { email: string }) {
-  return apifetch<CheckUserResponse>(`api/v1/member/record/exists/`, {
+  return apifetch<CheckUserResponse>("api/v1/member/record/exists/", {
     method: "POST",
     body: JSON.stringify(data),
   });

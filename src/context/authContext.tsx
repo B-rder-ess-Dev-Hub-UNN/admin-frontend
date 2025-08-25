@@ -1,4 +1,4 @@
-import { useState, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import loginAdmin from "../../services/apis/login";
 
 type User = {
@@ -21,15 +21,22 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children?: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem("access_token");
+  });
   const [user, setUser] = useState<User | null>(null);
 
-  async function login(data: any) {
+  async function login(data: Logindetails) {
     const res = await loginAdmin(data);
     const user = res.data;
     const userData: User = { name: user.name, email: user.email, id: user.id };
+
+    localStorage.setItem("admin_name", user.name);
+    localStorage.setItem("admin_email", user.email);
+    localStorage.setItem("admin_id", user.id);
     localStorage.setItem("access_token", user.tokens.access_token);
     localStorage.setItem("refresh_token", user.tokens.refresh_token);
+
     setUser(userData);
     setIsLoggedIn(true);
     return res;
@@ -40,22 +47,17 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
     setIsLoggedIn(false);
   };
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (token) {
-  //     try {
-  //       const payload = JSON.parse(atob(token.split(".")[1]));
-  //       const now = Math.floor(Date.now() / 1000);
-  //       if (now > payload.exp) {
-  //         logout();
-  //       } else {
-  //         setUser({ name: payload.name, email: payload.email });
-  //       }
-  //     } catch (error) {
-  //       logout();
-  //     }
-  //   }
-  // }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const name = localStorage.getItem("admin_name");
+    const email = localStorage.getItem("admin_email"); // save this on login
+    const id = localStorage.getItem("admin_id"); // save this on login
+
+    if (token && name && email && id) {
+      setIsLoggedIn(true);
+      setUser({ name, email, id });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>

@@ -18,38 +18,115 @@ import PaymentMade from "./pages/paymentMade";
 import GuestDetails from "./pages/guestDetails";
 import SaveDetails from "./pages/detailsSaved";
 import DashboardLayout from "./componeents/dashboard/dashBoardLayout";
+import type { JSX } from "react";
 
 export default function App() {
-  const { isLoggedIn } = useAuth();
-
+  function PrivateRoute({ children }: { children: JSX.Element }) {
+    const { isLoggedIn } = useAuth();
+    return isLoggedIn ? children : <Navigate to="/login" replace />;
+  }
   return (
     <Router>
       <Routes>
-        {!isLoggedIn ? (
-          <>
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </>
-        ) : (
-          <>
-            {" "}
-            <Route path="/checkIn" element={<CheckIn />} />
-            <Route path="/nonMember" element={<NonMember />} />
-            <Route path="/isMember" element={<Member />} />
-            <Route path="/seats" element={<Seats />} />
-            <Route path="/paymentMade" element={<PaymentMade />} />
-            <Route path="/enterDetails" element={<GuestDetails />} />
-            <Route path="/detailSaved" element={<SaveDetails />} />
-            <Route path="*" element={<Navigate to="/checkIn" replace />} />
-            <Route element={<DashboardLayout />}>
-              <Route path="/check-ins" element={<CheckIns />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/schedule" element={<Schedule />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/checkIn" replace />} />
-          </>
-        )}
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
+        <Route
+          path="/checkIn"
+          element={
+            <PrivateRoute>
+              <CheckIn />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/nonMember"
+          element={
+            <PrivateRoute>
+              <NonMember />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/isMember"
+          element={
+            <PrivateRoute>
+              <Member />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/seats"
+          element={
+            <PrivateRoute>
+              <Seats />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/paymentMade"
+          element={
+            <PrivateRoute>
+              <PaymentMade />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/enterDetails"
+          element={
+            <PrivateRoute>
+              <GuestDetails />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/detailSaved"
+          element={
+            <PrivateRoute>
+              <SaveDetails />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          element={
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route
+            path="/check-ins"
+            element={
+              <PrivateRoute>
+                <CheckIns />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/statistics"
+            element={
+              <PrivateRoute>
+                <Statistics />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PrivateRoute>
+                <Register />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/schedule"
+            element={
+              <PrivateRoute>
+                <Schedule />
+              </PrivateRoute>
+            }
+          />
+        </Route>
       </Routes>
     </Router>
   );

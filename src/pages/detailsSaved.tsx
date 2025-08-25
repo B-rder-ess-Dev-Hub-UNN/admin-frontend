@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function SaveDetails() {
   const navigate = useNavigate();
   const proceed = () => {
-    navigate("/seats");
+    navigate("/nonMember");
   };
   return (
     <div>

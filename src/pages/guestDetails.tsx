@@ -53,7 +53,7 @@ export default function GuestDetails({
         localStorage.setItem("user_id", capture_details.id);
         navigate("/detailSaved");
       } catch (err: any) {
-        setErrorMessage(`${err.message}`);
+        setErrorMessage(`network connectivity issues`);
       } finally {
         setloading(false);
       }
@@ -125,7 +125,7 @@ export default function GuestDetails({
           <span>Schedule</span>
         </motion.div>
       </Link>
-      <Link to="*">
+      <Link to="checkIn">
         <motion.div
           className={`flex items-center px-6 py-3 mt-[127px] ${
             isActive("/schedule") ? "font-bold bg-gray-100" : ""

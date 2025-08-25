@@ -7,7 +7,7 @@ import { ChartNoAxesCombined, CalendarCheck2, CircleUser } from "lucide-react";
 const Sidebar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const admin_name = localStorage.getItem("admin_name");
   const isActive = (path: string) => location.pathname === path;
 
   // Animation variants for mobile
@@ -31,7 +31,7 @@ const Sidebar = () => {
           </div>
           <div className="ml-4">
             <div className="font-bold text-black">ADMIN</div>
-            <div className="text-sm">PeeJay</div>
+            <div className="text-sm">{admin_name}</div>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ const Sidebar = () => {
         </Link>
 
         <div className="p-6 md:mt-32 mt-48">
-          <Link to="/">
+          <Link to="/seats">
             {" "}
             <motion.div
               className="flex items-center cursor-pointer"

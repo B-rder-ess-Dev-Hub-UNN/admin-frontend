@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { checkIfUserExists } from "../../../services/apis/member";
 import { ChevronRight, User, Star, StarHalf } from "lucide-react";
 import HeaderProps from "../../componeents/dashboard/HeaderPros";
+
 const Statistics = () => {
   const [member_percentage, setMember_percentage] = useState(0);
   const [non_member_percentage, setNon_member_percentage] = useState(0);
@@ -11,40 +12,53 @@ const Statistics = () => {
   const [userStatuses, setUserStatuses] = useState<
     Record<string, "member" | "non-member">
   >({});
+  const [error_message, set_error_message] = useState("");
 
-  useEffect(() => {
-    async function statsResponse() {
-      const res = await userStats();
-      console.log(res);
-      const statsData = res.data;
-      setMember_percentage(statsData.member_percentage);
-      setNon_member_percentage(statsData.non_member_percentage);
-      setTotal_checked_in_users(statsData.total_checked_in_users);
-
-      const status: Record<string, "member" | "non-member"> = {};
-
-      await Promise.all(
-        checked_in_users.map(async (user) => {
-          try {
-            const res = await checkIfUserExists({ email: user.email });
-            status[user.email] = res.status ? "member" : "non-member";
-          } catch (error) {
-            status[user.email] = "non-member";
-          }
-        })
-      );
-      setUserStatuses(userStatuses);
-    }
-    statsResponse();
-  }, []);
   const checked_in_users: any[] = JSON.parse(
     localStorage.getItem("checked_in_users") || "[]"
   );
 
+  useEffect(() => {
+    async function statsResponse() {
+      try {
+        const res = await userStats();
+        console.log("Stats response:", res);
+        const statsData = res.data;
+        setMember_percentage(statsData.member_percentage);
+        setNon_member_percentage(statsData.non_member_percentage);
+        setTotal_checked_in_users(statsData.total_checked_in_users);
+        console.log(total_checked_in_users);
+        const status: Record<string, "member" | "non-member"> = {};
+
+        await Promise.all(
+          checked_in_users.map(async (user) => {
+            try {
+              const res = await checkIfUserExists({ email: user.email });
+              status[user.email] = res.data.is_member ? "member" : "non-member";
+            } catch (error: any) {
+              // Handle the "No user found" error specifically
+              if (error.message === "No user found with this email") {
+                status[user.email] = "non-member";
+              } else {
+                console.error("Error checking user:", error);
+                status[user.email] = "non-member";
+              }
+            }
+          })
+        );
+
+        setUserStatuses(status); //Fixed: was setUserStatuses(userStatuses)
+      } catch (error: any) {
+        set_error_message(error.message);
+      }
+    }
+
+    statsResponse();
+  }, [total_checked_in_users]); // Add dependency array
+
   return (
     <div className="h-full flex flex-col">
       <HeaderProps currentPage="Statistics" />
-
       <div className="md:p-6 py-6 flex-1">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 justify-center mb-8">
           <motion.div
@@ -69,7 +83,7 @@ const Statistics = () => {
                   <ChevronRight size={18} />
                 </span>
                 <span className="font-[400]">
-                  {total_checked_in_users && total_checked_in_users}
+                  {total_checked_in_users || "..."}
                 </span>
               </div>
             </div>
@@ -91,7 +105,7 @@ const Statistics = () => {
                   <ChevronRight size={18} />
                 </span>
                 <span className="font-[400]">
-                  {member_percentage && member_percentage}
+                  {member_percentage || "..."}%
                 </span>
               </div>
             </div>
@@ -119,55 +133,70 @@ const Statistics = () => {
                   <ChevronRight size={18} />
                 </span>
                 <span className="font-[400]">
-                  {non_member_percentage && non_member_percentage}
+                  {non_member_percentage || "..."}%
                 </span>
               </div>
             </div>
           </motion.div>
         </div>
-        <h2 className="text-lg font-semibold mb-4">Leaderboard</h2>
 
-        <div className="flex items-center md:flex-row flex-col gap-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Leaderboard ({total_checked_in_users || "..."} users)
+        </h2>
+
+        <div className="flex items-start md:flex-row flex-col gap-6">
           <motion.div
-            className=" w-full"
+            className="w-full md:w-[60%]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <div className="flex flex-col space-y-4">
-              {checked_in_users?.map((user) => (
-                <motion.div
-                  className="border shadow-md border-[#FFDD00] rounded-lg p-4 flex items-center"
-                  whileHover={{ scale: 1.01 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="w-10 h-10 bg-[#FFDD00] rounded-full flex items-center justify-center font-bold mr-4">
-                    2
-                  </div>
-                  <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-[#FFDD00]">
-                      <User strokeWidth={1} />
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">{user.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {userStatuses[user.email] || "loading"}
+              {checked_in_users.length === 0 ? (
+                <div className="text-gray-500 text-center py-8">
+                  {error_message !== "" ? error_message : "no user yet"}
+                </div>
+              ) : (
+                checked_in_users.map((user, index) => (
+                  <motion.div
+                    key={index}
+                    className="border shadow-md border-[#FFDD00] rounded-lg p-4 flex items-center"
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="w-10 h-10 bg-[#FFDD00] rounded-full flex items-center justify-center font-bold mr-4">
+                      {index + 1}
                     </div>
-                  </div>
-                  <div className="flex">
-                    {Array(3)
-                      .fill(0)
-                      .map((_, i) => (
-                        <Star key={i} size={18} className="" />
-                      ))}
-                    <StarHalf size={18} className="" />
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-[#FFDD00]">
+                        <User strokeWidth={1} />
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">
+                        {user.name || "Unknown"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {userStatuses[user.email] || "loading..."}
+                      </div>
+                    </div>
+                    <div className="flex">
+                      {Array(3)
+                        .fill(0)
+                        .map((_, i) => (
+                          <Star key={i} size={18} className="text-yellow-400" />
+                        ))}
+                      <StarHalf size={18} className="text-yellow-400" />
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </motion.div>
-          <div className="shadow-md border-[#FFDD00] rounded-md w-full md:w-[40%] h-[260px] border   mx-auto "></div>
+          <div className="shadow-md border-[#FFDD00] rounded-md w-full md:w-[40%] h-[260px] border mx-auto">
+            {/* Placeholder for chart or additional content */}
+            <div className="flex items-center justify-center h-full text-gray-500"></div>
+          </div>
         </div>
       </div>
     </div>

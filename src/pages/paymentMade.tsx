@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 export default function PaymentMade() {
   const navigate = useNavigate();
 
-  const enterDetails = () => {
-    navigate("/checkIn");
+  const book_seat = () => {
+    navigate("/seats");
   };
   return (
     <div>
@@ -36,14 +36,14 @@ export default function PaymentMade() {
           </div>
 
           <motion.button
-            onClick={enterDetails}
+            onClick={book_seat}
             whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
             whileHover={{ backgroundColor: "#F4C400" }}
             transition={{ type: "spring", stiffness: "300" }}
-            className="bg-[#FFDD00] text-[15px] font-bold items-center w-[123px] h-[35px] mb-[33px] lg:w-[293px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px]"
+            className="bg-[#FFDD00] text-[15px] font-bold items-center w-[123px] h-[45px] mb-[33px] lg:w-[293px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px]"
           >
             {" "}
-            Back to check-In page
+            Book seat
           </motion.button>
           <p className="text-center mb-[46px] lg:mr-[23.57px] lg:ml-[27px] lg:text-[17px]">
             You now have access to make use of the Borderless <br /> web3

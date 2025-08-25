@@ -8,16 +8,27 @@ import { Checkin } from "../../../services/apis/dashboard";
 const CheckIns = () => {
   const [checked_in_users, setChecked_in_users] = useState<any[]>([]);
   const [available_seats, setAvailable_seats] = useState<number>(0);
+  const [error_message, set_error_message] = useState("");
+  const [loading, set_loading] = useState(false);
   useEffect(() => {
     async function checkin() {
-      const res = await Checkin();
-      const check_in_stats = res.data;
-      setChecked_in_users(check_in_stats.checked_in_users);
-      setAvailable_seats(check_in_stats.available_seats);
-      localStorage.setItem(
-        "checked_in_users",
-        JSON.stringify(check_in_stats.checked_in_users)
-      );
+      try {
+        set_loading(true);
+        const res = await Checkin();
+        const check_in_stats = res.data;
+        setChecked_in_users(check_in_stats.checked_in_users);
+        setAvailable_seats(check_in_stats.available_seats);
+        localStorage.setItem(
+          "checked_in_users",
+          JSON.stringify(check_in_stats.checked_in_users)
+        );
+        set_loading(false);
+      } catch (error: any) {
+        set_loading(false);
+        set_error_message(
+          error_message == "failed to fetch" ? "network error" : error.message
+        );
+      }
     }
 
     checkin();
@@ -38,7 +49,7 @@ const CheckIns = () => {
               <FaUser className="mr-2" size={14} />
               <span className="mr-2">{">"}</span>
               <span className="font-[400] text-sm ">
-                {checked_in_users?.length}
+                {checked_in_users?.length || "..."}
               </span>
             </div>
           </motion.div>
@@ -54,7 +65,7 @@ const CheckIns = () => {
               <img src="/chair.png" className="mr-2 w-5" />
               <span className="mr-2">{">"}</span>
               <span className="font-[400] text-sm">
-                {available_seats && available_seats}
+                {available_seats || "..."}
               </span>
             </div>
           </motion.div>
@@ -68,32 +79,38 @@ const CheckIns = () => {
         >
           <h2 className="text-lg font-[400] mb-4">Attendance</h2>
           <div className="border border-gray-200 overflow-x-scroll rounded-lg overflow-hidden">
-            <table className="min-w-full ">
-              <thead>
-                <tr className=" border-b font-[400] border-gray-200">
-                  <th className="py-4 px-6 text-left">Seat Number</th>
-                  <th className="py-4 px-6 text-left">Name</th>
-                  <th className="py-4 px-6 text-left">Email</th>
-                  <th className="py-4 px-6 text-left">Star rating</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Table is empty in the mockup, so we'll leave it empty here too */}
-                {checked_in_users?.map((user, i) => (
-                  <tr key={i} className="border-b border-gray-200">
-                    <td className="py-4 px-6">{user.seat_number} </td>
-                    <td className="py-4 px-6">{user.name} </td>
-                    <td className="py-4 px-6">{user.email} </td>
-                    <td className="py-4 px-6 flex items-center gap-1">
-                      <Star size={18} color="#FFDD00" />{" "}
-                      <Star size={18} color="#FFDD00" />{" "}
-                      <Star size={18} color="#FFDD00" /> <Star size={18} />{" "}
-                      <Star size={18} />{" "}
-                    </td>
+            {!loading ? (
+              <table className="min-w-full ">
+                <thead>
+                  <tr className=" border-b font-[400] border-gray-200">
+                    <th className="py-4 px-6 text-left">Seat Number</th>
+                    <th className="py-4 px-6 text-left">Name</th>
+                    <th className="py-4 px-6 text-left">Email</th>
+                    <th className="py-4 px-6 text-left">Star rating</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {checked_in_users?.map((user, i) => (
+                    <tr key={i} className="border-b border-gray-200">
+                      <td className="py-4 px-6">{user.seat_number} </td>
+                      <td className="py-4 px-6">{user.name} </td>
+                      <td className="py-4 px-6">{user.email} </td>
+                      <td className="py-4 px-6 flex items-center gap-1">
+                        <Star size={18} color="#FFDD00" />{" "}
+                        <Star size={18} color="#FFDD00" />{" "}
+                        <Star size={18} color="#FFDD00" /> <Star size={18} />{" "}
+                        <Star size={18} />{" "}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                {error_message !== "" ? error_message : "loading..."}
+              </p>
+            )}
           </div>
         </motion.div>
       </div>

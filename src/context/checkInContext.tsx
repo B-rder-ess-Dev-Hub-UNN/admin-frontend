@@ -19,18 +19,28 @@ export function CheckInProvider({ children }: { children?: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   async function checkin(data: any) {
-    const res = await checkIfUserExists(data);
+    try {
+      const res = await checkIfUserExists(data);
 
-    if (res.status == true) {
-      const payload = res.data;
-      setUser({
-        msg: res.msg,
-        name: payload.name,
-        email: payload.email,
-        isMember: payload.is_member,
-      });
+      if (res.status == true) {
+        const payload = res.data;
+        setUser({
+          msg: res.msg,
+          name: payload.name,
+          email: payload.email,
+          isMember: payload.is_member,
+        });
+        return res;
+      }
+    } catch (error: any) {
+      if (error.message == "No user found with this email") {
+        return {
+          msg: "No user found with this email",
+          status: false,
+        };
+      }
+      throw error;
     }
-    return res;
   }
   return (
     <CheckInContext.Provider value={{ user, checkin }}>
