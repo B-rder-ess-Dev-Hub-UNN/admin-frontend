@@ -28,7 +28,7 @@ export default function Login() {
     setloading(true);
     try {
       await login({ email, password });
-      navigate("/checkIn");
+      navigate("check-ins");
       console.log("navigating");
     } catch (error: any) {
       setErroMessage(error.message);

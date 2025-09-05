@@ -1,13 +1,27 @@
-import CheckIn from "../componeents/dashboard/CheckIn";
+import CheckIns from "./dashboard/CheckInsPage";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { paymentPlans, paymentConfirm } from "../../services/apis/payment";
+import { FaArrowLeft } from "react-icons/fa";
 import type { Plan } from "../../services/apis/payment";
 
-export default function NonMember() {
+type availablePlan = {
+  expires_at: Date;
+  seat_id: string;
+};
+export default function NonMember({
+  email,
+  email_handler,
+  available_plan_handler,
+}: {
+  email: string;
+  email_handler: (email: string) => void;
+  available_plan_handler: (plan: availablePlan[]) => void;
+}) {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [disable_payment, set_disable_payment] = useState(true);
   const [active_payment, set_active_payment] = useState(false);
   const [error_message, set_error_message] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<{
@@ -38,34 +52,45 @@ export default function NonMember() {
   ) {
     try {
       await paymentConfirm({ user_id, plan_id, expires_at });
+      set_disable_payment(false);
     } catch (error: any) {
       set_error_message(error.message);
     }
   }
+
   const paymentMade = async () => {
     try {
       const seat_id = localStorage.getItem("seat_id");
       const user_id = localStorage.getItem("user_id");
 
       seat_id && user_id;
-      navigate("/paymentMade");
+      navigate("/dashboard/paymentMade");
     } catch (error: any) {
       set_error_message(error.message);
     }
   };
   return (
-    <div>
-      <CheckIn>
+    <div className="relative">
+      <CheckIns email={email} email_handler={email_handler}>
         <div>
           <motion.div
-            className=" absolute flex flex-col  justify-center items-center bg-white w-full left-0 bottom-0 lg:min-h-[476px] lg:w-[894px] lg:top-[253px] lg:bottom-[253px] lg:left-[309px] border-1 border-yellow-400 border-solid rounded "
+            className=" absolute flex flex-col justify-center items-center w-full bg-white z-10  bottom-0 lg:max-h-[576px] lg:max-w-[800px] lg:top-[123px] lg:mx-auto border-1 shadow-2xl border-yellow-400 border-solid rounded lg:pt-[15px]"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
+            <motion.div
+              className="absolute top-4 left-6 flex items-center cursor-pointer"
+              whileHover={{ x: 5 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/dashboard/check-ins")}
+            >
+              <FaArrowLeft className="mr-2" size={18} />
+              <span>Back</span>
+            </motion.div>
             <img
-              className="h-[52px] w-[43px] mt-[15px] mb-[25px] lg:w-[71px] lg:h-[85px] lg:mt-[15px]"
-              src="borderless_logo.jpg"
+              className="h-[52px] w-[43px] mt-[39px] mb-[20px] lg:w-[71px] lg:h-[85px] lg:mb-[25px] lg:mt-[15px]"
+              src="/borderless_logo.jpg"
             ></img>
 
             <div className="flex flex-row justify-center items-center mb-[14px] lg:mb-[18px]">
@@ -73,7 +98,7 @@ export default function NonMember() {
                 Not a MEMBER
               </h1>
               <img
-                src="redChecked.jpg"
+                src="/redChecked.jpg"
                 className="w-[23px] h-[23px] mb-[14px] lg:w-[33px] lg:h-[33px]"
               ></img>
             </div>
@@ -81,25 +106,32 @@ export default function NonMember() {
               {" "}
               Make a payment
             </p>
+            {active_payment && selectedPlan && error_message == "" ? (
+              <p className="text-center text-green-400 text-[18px] mb-2">{`To pay ₦${selectedPlan.price} for ${selectedPlan.name}`}</p>
+            ) : (
+              <p className="text-center text-red-400 text-[18px] mb-2">
+                {`${error_message}`}
+              </p>
+            )}
 
             <div className="flex flex-col lg:flex-row ml-[31px] mb-[46px] lg:ml-[51.57px] lg:mb-[62px]">
               <div className="flex flex-row">
-                <div className="flex flex-col text-[13px] lg:text-[23px] mr-[200px] lg:mr-[169px]">
+                <div className="flex flex-col text-[13px] lg:text-[23px] mr-[200px] lg:mr-[169px] ">
                   <p className=" mb-[24px] lg:mb-[21px]">Hours</p>
                   {plans.map((plan) => (
-                    <p className=" mb-[22px] lg:mb-[15px]">{plan.name}</p>
+                    <p className=" mb-[22px] lg:mb-[35px] text-[20px] whitespace-nowrap">
+                      {plan.name}
+                    </p>
                   ))}
                 </div>
+
                 <div className="flex flex-col text-[13px] lg:text-[23px] mr-[29px] lg:mr-[18px]">
                   <p className=" mb-[24px] lg:mb-[21px]">Amount</p>
-                  {active_payment && selectedPlan && (
-                    <p className="text-center text-green-400 text-[25px] mb-2">{`To pay ₦${selectedPlan.price} for ${selectedPlan.name}`}</p>
-                  )}
 
                   {plans.map((plan, id) => (
                     <button
                       key={id}
-                      className={`bg-[#04252D] text-white w-[100px] h-[30px] mb-[22px] mr-[5px] lg:mb-[15px] lg:w-[150px] lg:h-[50px] ${
+                      className={`bg-[#04252D] text-white w-[100px] h-[30px] mb-[22px] mr-[5px] lg:mb-[15px] lg:w-[150px] lg:h-[50px] cursor-pointer ${
                         active_payment && "opacity-50 cursor-not-allowed"
                       }`}
                       onClick={() => {
@@ -113,6 +145,14 @@ export default function NonMember() {
                         const expires_at = new Date(
                           Date.now() + hours * 60 * 60 * 1000
                         ).toISOString();
+                        const seat_id = localStorage.getItem("seat_id");
+
+                        available_plan_handler([
+                          {
+                            expires_at: new Date(expires_at),
+                            seat_id: seat_id || "",
+                          },
+                        ]);
 
                         id && handlePayment(id, plan.id, expires_at);
 
@@ -132,7 +172,11 @@ export default function NonMember() {
                   whileHover={{ backgroundColor: "#F4C400" }}
                   transition={{ type: "spring", stiffness: "300" }}
                   onClick={paymentMade}
-                  className="bg-[#04252D] text-white w-[169px] h-[38px] mb-[38px] mt-[38px] lg:w-[293px] lg:h-[59px]  lg:mb-[48px]"
+                  className={`bg-[#04252D] text-white w-[169px] h-[38px] mb-[38px] mt-[38px] lg:w-[293px] lg:h-[59px]  lg:mb-[48px]  ${
+                    disable_payment
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  }`}
                 >
                   Payment Made
                 </motion.button>
@@ -142,13 +186,9 @@ export default function NonMember() {
                 </p>
               </div>
             </div>
-            <p className="text-red-500 mb-[10px] text-[20px]">
-              {error_message}
-            </p>
           </motion.div>
         </div>
-        n
-      </CheckIn>
+      </CheckIns>
     </div>
   );
 }

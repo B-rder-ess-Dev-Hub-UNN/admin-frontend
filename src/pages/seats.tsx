@@ -1,6 +1,5 @@
-import CheckIn from "../componeents/dashboard/CheckIn";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 // import { useCheckInAuth } from "../context/checkInContext";
@@ -22,7 +21,8 @@ export default function Seats() {
   const [refresh, setRefresh] = useState(0);
   const [booked_seat, setbooked_seat] = useState<BookSeat>();
   const [display_box, setDisplay_box] = useState(false);
-
+  const [visible, set_visible] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [current_seat, setcurrent_seat] = useState<Seats>();
   const navigate = useNavigate();
   const [seat, setSeat] = useState<Seats[]>([]);
@@ -30,6 +30,13 @@ export default function Seats() {
 
   // const { user } = useCheckInAuth();
   const user_id = localStorage.getItem("user_id");
+
+  const start_timer = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      set_visible(false);
+    }, 2000);
+  };
 
   useEffect(() => {
     try {
@@ -49,7 +56,7 @@ export default function Seats() {
         console.log("Fetch aborted, no worries.");
       } else console.log("seat error", error);
     }
-  }, [refresh, seat]);
+  }, [refresh]);
 
   async function checkOut(data: { seat_id: string }) {
     const res = await checkOutSeat(data);
@@ -62,8 +69,10 @@ export default function Seats() {
   }
 
   const proceed = async () => {
-    if (!booked_seat) return;
-    navigate("/checkIn");
+    const identity = localStorage.getItem("status");
+    if (!booked_seat || !current_seat) return;
+    if (identity == "non_member") navigate("/dashboard/nonMember");
+    if (identity == "member") navigate("/dashboard/check-ins");
   };
   function seatRow(seatNum1: Seats, seatNum2: Seats) {
     return (
@@ -80,19 +89,18 @@ export default function Seats() {
                 seat_number: seat.seat_number,
                 is_taken: seat.is_taken,
               });
-              // if (check_if_seat_is_taken(seat.id)) setSeat_is_taken(true);
               setDisplay_box(true);
             }}
           >
             <p className="text-center">{seat.seat_number}</p>
             <img
-              className="w-[30px] h-[30px] mb-[11px] mt-[3px] lg:w-[42px] lg:h-[42px] lg:mt-[19.11px] lg:mb-[21.5px]"
-              src="chair.png"
+              className="w-[30px] h-[30px] mb-[11px] mt-[3px] lg:w-[42px] lg:h-[42px] lg:mt-[19.11px] lg:mb-[21.5px] "
+              src="/chair.png"
             ></img>
             {seat.is_taken ? (
               <img
                 className="w-[16px] h-[16px] lg:w-[20.13px] lg:h-[20.13px]"
-                src={`${seat.is_taken ? "checked.jpg" : "redChecked.jpg"}`}
+                src={`${seat.is_taken ? "/checked.jpg" : "/redChecked.jpg"}`}
               ></img>
             ) : (
               ""
@@ -104,20 +112,21 @@ export default function Seats() {
   }
   if (seat.length < 10) {
     return (
-      <CheckIn>
-        <div className=" absolute text-center top-40 left-1/2 text-lg font-bold text-[29px]">
-          Loading seats...
-        </div>
-      </CheckIn>
+      <div className=" absolute text-center top-40 left-1/2 text-lg font-bold text-[29px]">
+        Loading seats...
+      </div>
     );
   }
 
   const dialog_box = (
     <motion.div
-      className="absolute flex flex-col justify-center items-center bg-white w-full bottom-0 left-0  lg:max-h-[540px] lg:max-w-[894px] lg:top-[253px] lg:bottom-[253px] lg:left-[200px] border-1 border-yellow-400 border-solid rounded"
+      className="absolute top-40 mx-auto
+             flex flex-col justify-center items-center bg-white 
+             w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto 
+             border-2 border-yellow-400 rounded-lg p-6 shadow-xl z-50"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 1 }}
     >
       <motion.div
         className="absolute top-4 left-6 flex items-center cursor-pointer"
@@ -130,23 +139,25 @@ export default function Seats() {
       </motion.div>
       <img
         className="h-[52px] w-[43.26px] mt-[15px] mb-[21px] lg:w-[71px] lg:h-[85px] lg:mb-[25px] lg:mt-[15px]"
-        src="borderless_logo.jpg"
+        src="/borderless_logo.jpg"
       ></img>
 
       <div className="flex flex-row justify-center items-center mb-[38px] lg:mb-[64px]">
         <h1 className="text-[15px]  lg:font-bold">member</h1>
         <img
-          src="checked.jpg"
+          src="/checked.jpg"
           className="w-[23px] h-[23px] lg:w-[33px] lg:h-[33px]"
         ></img>
       </div>
-      <p className="text-center text-green-400 text-[25px] mb-2">
-        {success_msg}
-      </p>
-      <div className="grid grid-row-2 gap-2">
+
+      <div className="grid grid-cols-2 gap-2">
         <motion.button
           onClick={() => {
-            if (!user_id || current_seat?.is_taken) {
+            if (!user_id) {
+              set_success_msg("Please Go to Check in before booking a seat");
+              return;
+            }
+            if (current_seat?.is_taken) {
               return;
             }
             bookseat({ user_id: user_id, seat_id: current_seat?.id! });
@@ -159,13 +170,17 @@ export default function Seats() {
             set_success_msg(
               `Seat ${current_seat?.seat_number} is booked successfully`
             );
+            set_visible(true);
+            start_timer();
           }}
           disabled={!user_id || current_seat?.is_taken}
           whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
           whileHover={{ backgroundColor: "#F4C400" }}
           transition={{ type: "spring", stiffness: "300" }}
           className={`bg-[#FFDD00] text-[15px] font-bold items-center w-[100px] h-[35px] mb-[33px] lg:w-[250px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px] ${
-            current_seat?.is_taken && "cursor-not-allowed opacity-50"
+            current_seat?.is_taken
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer"
           }`}
         >
           {" "}
@@ -182,11 +197,18 @@ export default function Seats() {
             set_success_msg(
               `Seat ${current_seat?.seat_number} Checked out successfully`
             );
+            set_visible(true);
+            start_timer();
           }}
+          disabled={!current_seat?.seat_number || !current_seat?.is_taken}
           whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
           whileHover={{ backgroundColor: "#F4C400" }}
           transition={{ type: "spring", stiffness: "300" }}
-          className="bg-[#FFDD00] text-[15px] font-bold items-center w-[100px] h-[35px] mb-[33px] lg:w-[250px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px]"
+          className={`bg-[#FFDD00] text-[15px] font-bold items-center w-[100px] h-[35px] mb-[33px]  lg:w-[250px] lg:h-[59px] lg:text-[25px]  lg:mx-auto lg:mb-[48px] ${
+            !current_seat?.is_taken
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer"
+          }`}
         >
           {" "}
           Check Out
@@ -199,69 +221,94 @@ export default function Seats() {
     </motion.div>
   );
 
+  const successful = (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 1 }}
+      className={`block ${
+        !visible && "hidden"
+      } absolute shadow-2xl p-5 right-5 top-20 bg-red-200`}
+      onMouseEnter={() => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+      }}
+      onMouseLeave={() => start_timer()}
+    >
+      <img></img>
+      <p className="text-center font-bold text-black text-[18px] mb-2">
+        {success_msg}
+      </p>
+    </motion.div>
+  );
+
   return (
     <div>
-      <CheckIn>
-        <div>
+      <div className="relative">
+        <motion.div
+          className="flex flex-col mt-30 lg:flex-row md:flex-row pt-6 bg-white border border-yellow-400 
+             rounded-lg shadow-2xl mx-auto
+             w-full max-w-[1000px] lg:max-h-[682px] "
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+        >
           <motion.div
-            className="absolute flex flex-col lg:flex-row bg-white border-solid rounded border-1 border-yellow-400 w-full max-h-[692px] left-0 bottom-0 lg:left-[191.87px]  lg:top-[215px] lg:max-w-[1129px] lg:max-h-[682px]"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+            className="absolute top-2 left-5 lg:left-8 flex items-center cursor-pointer"
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate("/dashboard/check-ins")}
           >
-            <motion.div
-              className="absolute top-4 left-6 flex items-center cursor-pointer"
-              whileHover={{ x: 5 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/checkIn")}
-            >
-              <FaArrowLeft className="mr-2" size={18} />
-              <span>Back</span>
-            </motion.div>
-            <div className=" block lg:hidden bg-white  py-2">
-              <h1 className="text-[15px] mt-[34px] font-bold text-center">
-                Sitting Arrangement
-              </h1>
-              <p className="text-[15px] mt-[20px] text-center">Get a set</p>
-            </div>
-            <div className="flex flex-row lg:mt-[15px]">
-              <div className="flex flex-col ml-[25px] mr-[87px] lg:mr-[148px] lg:ml-[137px]">
-                {seatRow(seat[0], seat[1])}
-                {seatRow(seat[4], seat[5])}
-                {seatRow(seat[8], seat[9])}
-              </div>
-              <div className="flex flex-col">
-                {seatRow(seat[2], seat[3])}
-                {seatRow(seat[6], seat[7])}
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center  mt-[20px] lg:mt-[238px]">
-              <RefreshCw
-                onClick={() => setRefresh((prev) => prev + 1)}
-                size={20}
-                className="cursor-pointer w-6 h-6 text-black mb-[10px] hover:text-yellow-500 transition"
-              />
-              <motion.button
-                whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
-                whileHover={{ backgroundColor: "#F4C400" }}
-                transition={{ type: "spring", stiffness: "300" }}
-                onClick={proceed}
-                className={`w-[111px] h-[35px] mx-auto mb-[18px] lg:w-[182px] lg:h-[59px]  bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded lg:mx-auto lg:mb-[50px] ${
-                  !booked_seat && "cursor-not-allowed opacity-50"
-                }`}
-              >
-                Proceed
-              </motion.button>
-              <p className=" text-[10px] mb-[27px] lg:text-[17px] text-center">
-                You now have access to make use of the Borderless <br /> web3
-                product house
-              </p>
-            </div>
+            <FaArrowLeft className="mr-2" size={18} />
+            <span className="text-[12px] lg:text-[15px]">Back</span>
           </motion.div>
+          <div className=" block md:hidden lg:hidden bg-white  py-2">
+            <h1 className="text-[15px] mt-[34px] font-bold text-center">
+              Sitting Arrangement
+            </h1>
+            <p className="text-[15px] mt-[20px] text-center">Get a set</p>
+          </div>
+          <div className="flex flex-row  md:mt-2 lg:mt-[15px]">
+            <div className="flex flex-col ml-[25px] mr-[87px] lg:mr-[148px] lg:ml-[137px]">
+              {seatRow(seat[0], seat[1])}
+              {seatRow(seat[4], seat[5])}
+              {seatRow(seat[8], seat[9])}
+            </div>
+            <div className="flex flex-col">
+              {seatRow(seat[2], seat[3])}
+              {seatRow(seat[6], seat[7])}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center  mt-[20px] lg:mt-[238px] md:ml-20 lg:ml-5">
+            <RefreshCw
+              onClick={() => setRefresh((prev) => prev + 1)}
+              size={20}
+              className="cursor-pointer w-6 h-6 text-black mb-[10px] hover:text-yellow-500 transition"
+            />
+            <motion.button
+              whileTap={{ scale: 0.95, backgroundColor: "#F4C400" }}
+              whileHover={{ backgroundColor: "#F4C400" }}
+              transition={{ type: "spring", stiffness: "300" }}
+              onClick={proceed}
+              className={`w-[111px] h-[35px] mx-auto mb-[18px] lg:w-[182px] lg:h-[59px] cursor-pointer bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded lg:mx-auto lg:mb-[50px] ${
+                !booked_seat && "cursor-not-allowed opacity-50"
+              }`}
+            >
+              Proceed
+            </motion.button>
+            <p className=" text-[10px] mb-[27px] lg:text-[17px] text-center">
+              You now have access to make use of the Borderless <br /> web3
+              product house
+            </p>
+          </div>
+        </motion.div>
+        <div className="flex items-center justify-center z-40">
+          {" "}
           {display_box && dialog_box}
         </div>
-      </CheckIn>
+
+        {visible && successful}
+      </div>
     </div>
   );
 }

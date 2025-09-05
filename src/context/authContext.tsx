@@ -43,19 +43,23 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   }
 
   const logout = () => {
+    localStorage.clear();
     setUser(null);
     setIsLoggedIn(false);
   };
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
+    const refresh = localStorage.getItem("refresh_token");
     const name = localStorage.getItem("admin_name");
-    const email = localStorage.getItem("admin_email"); // save this on login
-    const id = localStorage.getItem("admin_id"); // save this on login
+    const email = localStorage.getItem("admin_email");
+    const id = localStorage.getItem("admin_id");
 
-    if (token && name && email && id) {
+    if (token && refresh && name && email && id) {
       setIsLoggedIn(true);
       setUser({ name, email, id });
+    } else {
+      logout();
     }
   }, []);
 

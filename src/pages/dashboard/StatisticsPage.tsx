@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { userStats } from "../../../services/apis/dashboard";
 import { useEffect, useState } from "react";
 import { checkIfUserExists } from "../../../services/apis/member";
-import { ChevronRight, User, Star, StarHalf } from "lucide-react";
+import { User, Star, StarHalf } from "lucide-react";
 import HeaderProps from "../../componeents/dashboard/HeaderPros";
 
 const Statistics = () => {
@@ -79,9 +79,6 @@ const Statistics = () => {
                 ></div>
               </div>
               <div className="ml-2 flex items-center">
-                <span className="mr-2">
-                  <ChevronRight size={18} />
-                </span>
                 <span className="font-[400]">
                   {total_checked_in_users || "..."}
                 </span>
@@ -101,9 +98,6 @@ const Statistics = () => {
                 <div className="w-full h-full rounded-full border-[8px] border-[#FFDD00] border-t-transparent border-l-transparent"></div>
               </div>
               <div className="ml-2 flex items-center">
-                <span className="mr-2">
-                  <ChevronRight size={18} />
-                </span>
                 <span className="font-[400]">
                   {member_percentage || "..."}%
                 </span>
@@ -129,9 +123,6 @@ const Statistics = () => {
                 ></div>
               </div>
               <div className="ml-2 flex ">
-                <span className="mr-2">
-                  <ChevronRight size={18} />
-                </span>
                 <span className="font-[400]">
                   {non_member_percentage || "..."}%
                 </span>
@@ -144,7 +135,7 @@ const Statistics = () => {
           Leaderboard ({total_checked_in_users || "..."} users)
         </h2>
 
-        <div className="flex items-start md:flex-row flex-col gap-6">
+        <div className="flex items-start md:flex-row flex-col ga  {/* Placeholder for chart or additional content */}p-6">
           <motion.div
             className="w-full md:w-[60%]"
             initial={{ opacity: 0, y: 20 }}
@@ -194,7 +185,6 @@ const Statistics = () => {
             </div>
           </motion.div>
           <div className="shadow-md border-[#FFDD00] rounded-md w-full md:w-[40%] h-[260px] border mx-auto">
-            {/* Placeholder for chart or additional content */}
             <div className="flex items-center justify-center h-full text-gray-500"></div>
           </div>
         </div>

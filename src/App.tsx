@@ -4,129 +4,128 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { useState } from "react";
 import CheckIns from "./pages/dashboard/CheckInsPage";
 import Schedule from "./pages/dashboard/SchedulePage";
 import Register from "./pages/dashboard/RegisterPage";
 import Statistics from "./pages/dashboard/StatisticsPage";
 import { useAuth } from "./context/authContext";
 import Login from "./pages/Login";
-import CheckIn from "./componeents/dashboard/CheckIn";
+
 import Member from "./pages/Member";
 import NonMember from "./pages/NonMember";
 import Seats from "./pages/seats";
 import PaymentMade from "./pages/paymentMade";
-import GuestDetails from "./pages/guestDetails";
 import SaveDetails from "./pages/detailsSaved";
+import GuestDetails from "./pages/guestDetails";
 import DashboardLayout from "./componeents/dashboard/dashBoardLayout";
-import type { JSX } from "react";
 
+export type availablePlan = {
+  expires_at: Date;
+  seat_id: string;
+};
 export default function App() {
-  function PrivateRoute({ children }: { children: JSX.Element }) {
-    const { isLoggedIn } = useAuth();
-    return isLoggedIn ? children : <Navigate to="/login" replace />;
-  }
+  const { isLoggedIn } = useAuth();
+  const [email, set_email] = useState("");
+  const [available_plan, set_available_plan] = useState<availablePlan[] | []>(
+    []
+  );
+
+  const time_expired = (time: Date) => {
+    return time.getTime() < Date.now();
+  };
+
+  const available_plan_handler = (plan: availablePlan[]) => {
+    set_available_plan(plan);
+  };
+
+  const email_handler = (email: string) => {
+    set_email(email);
+  };
+
   return (
     <Router>
       <Routes>
+        {/* Public routes (always available) */}
         <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
 
+        {/* Redirect root ("/") depending on auth */}
         <Route
-          path="/checkIn"
+          path="/"
           element={
-            <PrivateRoute>
-              <CheckIn />
-            </PrivateRoute>
+            isLoggedIn ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
-        <Route
-          path="/nonMember"
-          element={
-            <PrivateRoute>
-              <NonMember />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/isMember"
-          element={
-            <PrivateRoute>
-              <Member />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/seats"
-          element={
-            <PrivateRoute>
-              <Seats />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/paymentMade"
-          element={
-            <PrivateRoute>
-              <PaymentMade />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/enterDetails"
-          element={
-            <PrivateRoute>
-              <GuestDetails />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/detailSaved"
-          element={
-            <PrivateRoute>
-              <SaveDetails />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          element={
-            <PrivateRoute>
-              <DashboardLayout />
-            </PrivateRoute>
-          }
-        >
+
+        {isLoggedIn && (
           <Route
-            path="/check-ins"
+            path="/dashboard"
             element={
-              <PrivateRoute>
-                <CheckIns />
-              </PrivateRoute>
+              <DashboardLayout
+                time_expired={time_expired}
+                available_plan={available_plan}
+              />
             }
-          />
-          <Route
-            path="/statistics"
-            element={
-              <PrivateRoute>
-                <Statistics />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PrivateRoute>
-                <Register />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/schedule"
-            element={
-              <PrivateRoute>
-                <Schedule />
-              </PrivateRoute>
-            }
-          />
-        </Route>
+          >
+            {/* Default page under /dashboard */}
+            <Route index element={<Navigate to="check-ins" replace />} />
+
+            <Route
+              path="check-ins"
+              element={<CheckIns email={email} email_handler={email_handler} />}
+            />
+            <Route path="statistics" element={<Statistics />} />
+            <Route path="register" element={<Register />} />
+            <Route path="schedule" element={<Schedule />} />
+
+            <Route
+              path="nonMember"
+              element={
+                <NonMember
+                  email={email}
+                  email_handler={email_handler}
+                  available_plan_handler={available_plan_handler}
+                />
+              }
+            />
+            <Route
+              path="isMember"
+              element={<Member email={email} email_handler={email_handler} />}
+            />
+            <Route path="seats" element={<Seats />} />
+            <Route
+              path="enterDetails"
+              element={<GuestDetails checked_in_email={email} />}
+            />
+            <Route
+              path="paymentMade"
+              element={
+                <PaymentMade email={email} email_handler={email_handler} />
+              }
+            />
+            <Route
+              path="detailSaved"
+              element={<SaveDetails checked_in_email={email} />}
+            />
+            <Route path="*" element={<Navigate to="check-ins" replace />} />
+          </Route>
+        )}
+
+        {/* Fallback: if no route matches */}
+        <Route
+          path="*"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
       </Routes>
     </Router>
   );

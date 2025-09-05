@@ -1,5 +1,17 @@
 const base_Url = "https://hubauthbackend-production.up.railway.app/";
 const api_key = import.meta.env.VITE_API_KEY;
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const [, payload] = token.split(".");
+    const decoded = JSON.parse(atob(payload));
+    const now = Math.floor(Date.now() / 1000);
+    return decoded.exp < now;
+  } catch (e) {
+    return true; // if decoding fails, treat as expired
+  }
+}
+
 async function getrefreshtoken(token: string): Promise<string | null> {
   const res = await fetch(`${base_Url}api/v1/admin/token/refresh/`, {
     method: "POST",
@@ -10,10 +22,11 @@ async function getrefreshtoken(token: string): Promise<string | null> {
     body: JSON.stringify({ refresh_token: token }),
   });
   if (!res.ok) {
-    console.log("cantfethc");
+    console.log("expired or invalid refresh token");
     return null;
   }
   const { data } = await res.json();
+
   return data.access_token;
 }
 
@@ -40,14 +53,20 @@ export default async function apifetch<T>(
     headers,
   });
 
-  if (res.status === 401 && auth && retry) {
+  if ((res.status === 401 || res.status === 400) && auth && retry) {
     const refresh_token = localStorage.getItem("refresh_token");
+    if (!refresh_token || isTokenExpired(refresh_token)) {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
     const newToken = await getrefreshtoken(`${refresh_token}`);
     if (newToken) {
       localStorage.setItem("access_token", newToken);
       return apifetch<T>(endpoints, options, auth, false);
     } else {
-      throw new Error("network connectivity issues.");
+      //  Refresh also failed → force logout
+      localStorage.clear();
+      window.location.replace("/login");
     }
   }
 

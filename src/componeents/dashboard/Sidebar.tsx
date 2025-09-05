@@ -2,13 +2,16 @@ import { useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaUserPlus, FaArrowLeft, FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
+import { useAuth } from "../../context/authContext";
 import { ChartNoAxesCombined, CalendarCheck2, CircleUser } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [login_out, set_login_out] = useState(false);
   const admin_name = localStorage.getItem("admin_name");
-  const isActive = (path: string) => location.pathname === path;
+  const { logout } = useAuth();
+  const isActive = (path: string) => location.pathname == path;
 
   // Animation variants for mobile
   const sidebarVariants = {
@@ -40,7 +43,7 @@ const Sidebar = () => {
         <Link to="/check-ins" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
             className={`flex items-center px-6 py-3 ${
-              isActive("/check-ins") ? "font-bold bg-gray-100" : ""
+              isActive("/check-ins") ? "font-bold bg-red-300" : ""
             }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
@@ -50,10 +53,10 @@ const Sidebar = () => {
           </motion.div>
         </Link>
 
-        <Link to="/statistics" onClick={() => setIsMobileMenuOpen(false)}>
+        <Link to="statistics" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
             className={`flex items-center px-6 py-3 ${
-              isActive("/statistics") ? "font-bold bg-gray-100" : ""
+              isActive("statistics") ? "font-bold bg-gray-100" : ""
             }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
@@ -63,10 +66,10 @@ const Sidebar = () => {
           </motion.div>
         </Link>
 
-        <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+        <Link to="register" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
             className={`flex items-center px-6 py-3 ${
-              isActive("/register") ? "font-bold bg-gray-100" : ""
+              isActive("register") ? "font-bold bg-gray-100" : ""
             }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
@@ -76,10 +79,10 @@ const Sidebar = () => {
           </motion.div>
         </Link>
 
-        <Link to="/schedule" onClick={() => setIsMobileMenuOpen(false)}>
+        <Link to="schedule" onClick={() => setIsMobileMenuOpen(false)}>
           <motion.div
             className={`flex items-center px-6 py-3 ${
-              isActive("/schedule") ? "font-bold bg-gray-100" : ""
+              isActive("schedule") ? "font-bold bg-gray-100" : ""
             }`}
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
@@ -89,18 +92,44 @@ const Sidebar = () => {
           </motion.div>
         </Link>
 
-        <div className="p-6 md:mt-32 mt-48">
-          <Link to="/seats">
-            {" "}
-            <motion.div
-              className="flex items-center cursor-pointer"
-              whileHover={{ x: 5 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <FaArrowLeft className="mr-4" size={16} />
-              <span>Back to Site</span>
-            </motion.div>
-          </Link>
+        <Link to="seats" onClick={() => setIsMobileMenuOpen(false)}>
+          <motion.div
+            className={`flex items-center px-6 py-3 ${
+              isActive("seats") ? "font-bold bg-gray-100" : ""
+            }`}
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <img src="/chair.png" className="mr-4 w-6" alt="Check In's" />
+            <span>Seats</span>
+          </motion.div>
+        </Link>
+        <Link to="enterDetails" onClick={() => setIsMobileMenuOpen(false)}>
+          <motion.div
+            className={`flex items-center px-6 py-3 ${
+              isActive("enterDetails") ? "font-bold bg-gray-100" : ""
+            }`}
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <img src="/chair.png" className="mr-4 w-6" alt="Check In's" />
+            <span>Non-member details </span>
+          </motion.div>
+        </Link>
+
+        <div className="relative p-6 md:mt-32 mt-48">
+          <button
+            className={`w-[85px] h-[35px] text-center p-[10px] mb-[20px] mt-[39px] lg:w-[176px] lg:h-[60px] bg-[#FFDD00] lg:mt-[29px] cursor-pointer ${
+              login_out && "opacity-50 cursor-not-allowed"
+            }`}
+            onClick={() => {
+              set_login_out(true);
+              setTimeout(logout, 2000);
+            }}
+          >
+            Log Out
+          </button>
+          <FaArrowLeft className="absolute left-2 mr-4" size={16} />
         </div>
       </div>
     </>
@@ -109,10 +138,10 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile menu button */}
-      <div className="lg:hidden fixed bg-white rounded-xl shadow-2xl border-b-3 rounded-l-none pb-2 pt-4 border-[#FFDD00] top-4 md:top-6 right-4 z-50">
+      <div className="lg:hidden fixed bg-white rounded-xl shadow-2xl rounded-l-none top-7 md:top-6 right-5 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="rounded-md p-2 focus:outline-none"
+          className="rounded-md focus:outline-none "
         >
           {isMobileMenuOpen ? (
             <FaTimes size={20} className="text-gray-700" />
@@ -130,7 +159,7 @@ const Sidebar = () => {
             animate="open"
             exit="closed"
             variants={overlayVariants}
-            className="fixed inset-0 bg-black z-30 lg:hidden"
+            className="fixed inset-0 bg-black z-30 t0p lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
             transition={{ duration: 0.3 }}
           />

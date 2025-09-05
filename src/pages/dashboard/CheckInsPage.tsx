@@ -4,13 +4,25 @@ import HeaderProps from "../../componeents/dashboard/HeaderPros";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Checkin } from "../../../services/apis/dashboard";
+import CheckIn from "../../componeents/dashboard/CheckIn";
 
-const CheckIns = () => {
+const CheckIns = ({
+  children,
+  email,
+  email_handler,
+}: {
+  children?: React.ReactNode;
+  email: string;
+  email_handler: (email: string) => void;
+}) => {
   const [checked_in_users, setChecked_in_users] = useState<any[]>([]);
   const [available_seats, setAvailable_seats] = useState<number>(0);
   const [error_message, set_error_message] = useState("");
   const [loading, set_loading] = useState(false);
+  const [check_in_input, set_check_in_input] = useState(false);
+
   useEffect(() => {
+    email_handler("");
     async function checkin() {
       try {
         set_loading(true);
@@ -63,7 +75,7 @@ const CheckIns = () => {
             <h2 className="text-lg font-[400] mb-3 md:mb-4">Seats Available</h2>
             <div className="flex items-center ">
               <img src="/chair.png" className="mr-2 w-5" />
-              <span className="mr-2">{">"}</span>
+              <span className="mr-2">{"-->"}</span>
               <span className="font-[400] text-sm">
                 {available_seats || "..."}
               </span>
@@ -77,35 +89,53 @@ const CheckIns = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <h2 className="text-lg font-[400] mb-4">Attendance</h2>
+          <div className="flex flex-row items-center">
+            {" "}
+            <h2 className="text-lg font-[400] mb-4">Attendance</h2>
+            <button
+              className="text-[12px] text-center ml-auto font-bold h-[40px] w-fit mb-2  lg:text-[18px] lg:h-[52px] p-4 bg-[#FFDD00] border border-[#FFDD00] border-solid rounded "
+              onClick={() => {
+                set_check_in_input(!check_in_input);
+              }}
+            >
+              {check_in_input ? "back" : "Check in user"}
+            </button>
+          </div>
+          {check_in_input && (
+            <div className="flex h-[100px] hover:shadow-2xl">
+              <CheckIn email={email} email_handler={email_handler} />
+            </div>
+          )}
           <div className="border border-gray-200 overflow-x-scroll rounded-lg overflow-hidden">
             {!loading ? (
-              <table className="min-w-full ">
-                <thead>
-                  <tr className=" border-b font-[400] border-gray-200">
-                    <th className="py-4 px-6 text-left">Seat Number</th>
-                    <th className="py-4 px-6 text-left">Name</th>
-                    <th className="py-4 px-6 text-left">Email</th>
-                    <th className="py-4 px-6 text-left">Star rating</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {checked_in_users?.map((user, i) => (
-                    <tr key={i} className="border-b border-gray-200">
-                      <td className="py-4 px-6">{user.seat_number} </td>
-                      <td className="py-4 px-6">{user.name} </td>
-                      <td className="py-4 px-6">{user.email} </td>
-                      <td className="py-4 px-6 flex items-center gap-1">
-                        <Star size={18} color="#FFDD00" />{" "}
-                        <Star size={18} color="#FFDD00" />{" "}
-                        <Star size={18} color="#FFDD00" /> <Star size={18} />{" "}
-                        <Star size={18} />{" "}
-                      </td>
+              <>
+                <table className="min-w-full ">
+                  <thead>
+                    <tr className=" border-b font-[400] border-gray-200">
+                      <th className="py-4 px-6 text-left">Seat Number</th>
+                      <th className="py-4 px-6 text-left">Name</th>
+                      <th className="py-4 px-6 text-left">Email</th>
+                      <th className="py-4 px-6 text-left">Star rating</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {checked_in_users?.map((user, i) => (
+                      <tr key={i} className="border-b border-gray-200">
+                        <td className="py-4 px-6">{user.seat_number} </td>
+                        <td className="py-4 px-6">{user.name} </td>
+                        <td className="py-4 px-6">{user.email} </td>
+                        <td className="py-4 px-6 flex items-center gap-1">
+                          <Star size={18} color="#FFDD00" />{" "}
+                          <Star size={18} color="#FFDD00" />{" "}
+                          <Star size={18} color="#FFDD00" /> <Star size={18} />{" "}
+                          <Star size={18} />{" "}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
             ) : (
               <p className="text-gray-500 text-center py-8">
                 {error_message !== "" ? error_message : "loading..."}
@@ -113,6 +143,7 @@ const CheckIns = () => {
             )}
           </div>
         </motion.div>
+        {children}
       </div>
     </div>
   );

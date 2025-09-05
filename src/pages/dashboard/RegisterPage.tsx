@@ -58,7 +58,7 @@ const Register = () => {
       transition={{ duration: 0.5 }}
     >
       <img
-        src="checked.jpg"
+        src="/checked.jpg"
         className="w-[67px] h-[67px] lg:w-[127px] mt-[29px] mb-[24px]  lg:h-[127px] lg:mb-[29px]"
       ></img>
       <p className="text-[11px] lg:text-[17px] mb-[33px] lg:mb-[38px] text-center">
@@ -69,7 +69,7 @@ const Register = () => {
         whileHover={{ backgroundColor: "#F4C400" }}
         transition={{ type: "spring", stiffness: "300" }}
         onClick={() => set_display_successful(false)}
-        className=" w-[94px] h-[37px] mb-[29px] lg:mb-[52px] lg:w-[184px] lg:h-[60px] lg:text-[25px] bg-[#FFDD00] font-bold"
+        className=" w-[94px] h-[37px] mb-[29px] lg:mb-[52px] lg:w-[184px] lg:h-[60px] lg:text-[25px] bg-[#FFDD00] font-bold cursor-pointer"
       >
         Proceed
       </motion.button>
@@ -97,9 +97,8 @@ const Register = () => {
               type="text"
               onChange={(e) => set_user_name(e.target.value)}
               value={user_name}
-              className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[37px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+              className=" placeholder:opacity-50 mr-3 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[37px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
             ></input>{" "}
-            <br />
             <input
               id="email"
               placeholder="Email"
@@ -115,9 +114,8 @@ const Register = () => {
               type="string"
               onChange={(e) => set_whatsapp_number(e.target.value)}
               value={whatsapp_number}
-              className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+              className=" placeholder:opacity-50 mr-3 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
             ></input>{" "}
-            <br />
             <input
               id="department"
               placeholder="department"
@@ -126,13 +124,14 @@ const Register = () => {
               value={department}
               className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
             ></input>
+            <br />
             <input
               id="tech_stack"
               placeholder="tech_stack"
               type="string"
               onChange={(e) => settech_stack(e.target.value)}
               value={tech_stack}
-              className=" placeholder:opacity-50 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
+              className=" placeholder:opacity-50 mr-3 placeholder:text-sm placeholder:italic w-[283px] h-[32px] mb-[40px] lg:mb-[44px] p-[10px] lg:w-[541px] lg:h-[62px] border-1 border-[#FFDD00] border-solid rounded"
             ></input>
             <input
               id="date_of_birth"
@@ -149,10 +148,10 @@ const Register = () => {
               transition={{ type: "spring", stiffness: "300" }}
               className={` ${
                 loading && "opacity-50 cursor-not-allowed"
-              } text-[15px] font-bold h-[37px] w-[77px] mb-[35px] lg:text-[25px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded`}
+              } text-[15px] font-bold h-[37px] w-[77px] mb-[35px] lg:text-[25px] lg:h-[57px] lg:w-[178px] lg:mb-[87px] bg-[#FFDD00] border-1 border-[#FFDD00] border-solid rounded cursor-pointer`}
             >
               {" "}
-              Save
+              {loading ? "Processing" : "Save"}
             </motion.button>
           </form>
           {display_successful && successful}
