@@ -48,7 +48,6 @@ export default function App() {
       <Routes>
         {/* Public routes (always available) */}
         <Route path="/login" element={<Login />} />
-
         {/* Redirect root ("/") depending on auth */}
         <Route
           path="/"
@@ -60,13 +59,14 @@ export default function App() {
             )
           }
         />
-
+        isDisabled
         {isLoggedIn && (
           <Route
             path="/dashboard"
             element={
               <DashboardLayout
                 time_expired={time_expired}
+                checked_in_email={email}
                 available_plan={available_plan}
               />
             }
@@ -114,7 +114,6 @@ export default function App() {
             <Route path="*" element={<Navigate to="check-ins" replace />} />
           </Route>
         )}
-
         {/* Fallback: if no route matches */}
         <Route
           path="*"

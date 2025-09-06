@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/authContext";
 import { ChartNoAxesCombined, CalendarCheck2, CircleUser } from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({ checked_in_email }: { checked_in_email: string }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [login_out, set_login_out] = useState(false);
@@ -92,28 +92,57 @@ const Sidebar = () => {
           </motion.div>
         </Link>
 
-        <Link to="seats" onClick={() => setIsMobileMenuOpen(false)}>
+        <Link
+          to={checked_in_email == "" ? "#" : "seats"}
+          onClick={(e) => {
+            if (checked_in_email == "") {
+              e.preventDefault(); // stop navigation if disabled
+              return;
+            }
+            setIsMobileMenuOpen(false);
+          }}
+          className={`flex items-center px-6 py-3 ${
+            isActive("seats") ? "font-bold bg-gray-100" : ""
+          } ${
+            checked_in_email == ""
+              ? "opacity-50 pointer-events-none cursor-not-allowed"
+              : ""
+          }`}
+        >
           <motion.div
-            className={`flex items-center px-6 py-3 ${
-              isActive("seats") ? "font-bold bg-gray-100" : ""
-            }`}
-            whileHover={{ x: 5 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={checked_in_email == "" ? {} : { x: 5 }}
+            whileTap={checked_in_email == "" ? {} : { scale: 0.98 }}
+            className="flex items-center"
           >
-            <img src="/chair.png" className="mr-4 w-6" alt="Check In's" />
+            <img src="/chair.png" className="mr-4 w-6" alt="Seats" />
             <span>Seats</span>
           </motion.div>
         </Link>
-        <Link to="enterDetails" onClick={() => setIsMobileMenuOpen(false)}>
+
+        <Link
+          to={checked_in_email == "" ? "#" : "enterDetails"} // fallback to "#" or undefined if disabled
+          onClick={(e) => {
+            if (checked_in_email == "") {
+              e.preventDefault(); // stop navigation
+              return;
+            }
+            setIsMobileMenuOpen(false);
+          }}
+          className={`flex items-center px-6 py-3 ${
+            isActive("enterDetails") ? "font-bold bg-gray-100" : ""
+          } ${
+            checked_in_email == ""
+              ? "opacity-50 pointer-events-none cursor-not-allowed"
+              : ""
+          }`}
+        >
           <motion.div
-            className={`flex items-center px-6 py-3 ${
-              isActive("enterDetails") ? "font-bold bg-gray-100" : ""
-            }`}
-            whileHover={{ x: 5 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={checked_in_email == "" ? {} : { x: 5 }}
+            whileTap={checked_in_email == "" ? {} : { scale: 0.98 }}
+            className="flex items-center"
           >
             <img src="/chair.png" className="mr-4 w-6" alt="Check In's" />
-            <span>Non-member details </span>
+            <span>Non-member details</span>
           </motion.div>
         </Link>
 
