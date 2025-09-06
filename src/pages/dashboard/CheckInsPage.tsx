@@ -59,7 +59,7 @@ const CheckIns = ({
             <h2 className="text-lg font-[400] mb-3 md:mb-4">Accepted</h2>
             <div className="flex items-center">
               <FaUser className="mr-2" size={14} />
-              <span className="mr-2">{">"}</span>
+              <span className="mr-2">{"-->"}</span>
               <span className="font-[400] text-sm ">
                 {checked_in_users?.length || "..."}
               </span>
