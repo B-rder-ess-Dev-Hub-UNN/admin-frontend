@@ -22,7 +22,7 @@ export default function Seats() {
   const [booked_seat, setbooked_seat] = useState<BookSeat>();
   const [display_box, setDisplay_box] = useState(false);
   const [visible, set_visible] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [current_seat, setcurrent_seat] = useState<Seats>();
   const navigate = useNavigate();
   const [seat, setSeat] = useState<Seats[]>([]);
