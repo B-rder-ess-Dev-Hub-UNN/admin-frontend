@@ -15,7 +15,7 @@ const Header = ({
 
   useEffect(() => {
     const checkExpiredSeats = () => {
-      const expiredSeats: string[] = ["1", "2"];
+      const expiredSeats: string[] = [];
 
       for (let i = 0; i < available_plan.length; i++) {
         if (time_expired(available_plan[i].expires_at)) {
