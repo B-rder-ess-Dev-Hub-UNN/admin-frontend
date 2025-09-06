@@ -94,25 +94,16 @@ const Sidebar = ({ checked_in_email }: { checked_in_email: string }) => {
 
         <Link
           to={checked_in_email == "" ? "#" : "seats"}
-          onClick={(e) => {
-            if (checked_in_email == "") {
-              e.preventDefault(); // stop navigation if disabled
-              return;
-            }
+          onClick={() => {
             setIsMobileMenuOpen(false);
           }}
-          className={`flex items-center px-6 py-3 ${
-            isActive("seats") ? "font-bold bg-gray-100" : ""
-          } ${
-            checked_in_email == ""
-              ? "opacity-50 pointer-events-none cursor-not-allowed"
-              : ""
-          }`}
         >
           <motion.div
-            whileHover={checked_in_email == "" ? {} : { x: 5 }}
-            whileTap={checked_in_email == "" ? {} : { scale: 0.98 }}
-            className="flex items-center"
+            className={`flex items-center px-6 py-3 ${
+              isActive("seats") ? "font-bold bg-gray-100" : ""
+            }`}
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.98 }}
           >
             <img src="/chair.png" className="mr-4 w-6" alt="Seats" />
             <span>Seats</span>
